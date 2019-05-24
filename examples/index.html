@@ -15,20 +15,21 @@
 
       // console.log(doodle);
       await doodle.load('./index.glsl');
+      // await doodle.load('./math-curve.glsl');
 
       // doodle.declareUniforms({
       //   abc: '2fv',
       // });
 
-      doodle.clipPath({
-        type: 'circle',
-        cx: 100,
-        cy: 100,
-        r: 50,
-      });
+      // doodle.clipPath({
+      //   type: 'circle',
+      //   cx: 100,
+      //   cy: 100,
+      //   r: 50,
+      // });
 
       doodle.render({
-        autoUpdate: false,
+        autoUpdate: true,
       });
 
       window.doodle = doodle;

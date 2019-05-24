@@ -6,8 +6,10 @@ import {setupWebGL, createProgram, pointsToBuffer} from './helpers';
 import DEFAULT_VERT from './default_vert.glsl';
 import DEFAULT_FRAG from './default_frag.glsl';
 import stdlib from './stdlib.glsl';
+import graph from './graph.glsl';
+import pattern from './pattern.glsl';
 
-const GLSL_LIBS = {stdlib};
+const GLSL_LIBS = {stdlib, graph, pattern};
 
 export default class Doodle {
   static uniformTypes = {
