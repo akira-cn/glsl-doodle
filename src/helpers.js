@@ -96,3 +96,14 @@ export function pointsToBuffer(points, Type = Float32Array) {
   }
   return buffer;
 }
+
+export function loadImage(src) {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  return new Promise((resolve) => {
+    img.onload = function () {
+      resolve(img);
+    };
+    img.src = src;
+  });
+}

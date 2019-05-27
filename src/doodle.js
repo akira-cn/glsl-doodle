@@ -1,7 +1,7 @@
 import {toPath} from 'svg-points';
 import svgMesh3d from 'svg-mesh-3d';
 
-import {setupWebGL, createProgram, pointsToBuffer} from './helpers';
+import {setupWebGL, createProgram, pointsToBuffer, loadImage} from './helpers';
 
 import DEFAULT_VERT from './default_vert.glsl';
 import DEFAULT_FRAG from './default_frag.glsl';
@@ -177,7 +177,63 @@ export default class Doodle {
 
     const fragmentShader = await _load(frag);
     const vertexShader = vert ? await _load(vert) : DEFAULT_VERT;
-    return this.setProgram(vertexShader, fragmentShader);
+    const program = this.setProgram(vertexShader, fragmentShader);
+
+    return program;
+  }
+
+  async loadTextures(...sources) {
+    const gl = this.gl;
+
+    if(this.textures) {
+      this.textures.forEach((texture) => {
+        gl.deleteTexture(texture);
+      });
+    }
+
+    const promises = sources.map(async (src, i) => {
+      const source = await loadImage(src);
+
+      gl.activeTexture(gl.TEXTURE0 + i);
+      const texture = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+      // gl.NEAREST is also allowed, instead of gl.LINEAR, as neither mipmap.
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      // Prevents s-coordinate wrapping (repeating).
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      // Prevents t-coordinate wrapping (repeating).
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+      // bind texture and set the sampler
+      // gl.bindTexture(gl.TEXTURE_2D, texture);
+
+      const sampler = `dd_sampler${i}`;
+      this.declareUniforms({
+        [sampler]: '1i',
+      });
+      this.uniforms[sampler] = i;
+
+      return texture;
+    });
+
+    const textures = await Promise.all(promises);
+
+    // texture coordinate data
+    const trianglesTexCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, trianglesTexCoordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0]), gl.STATIC_DRAW);
+
+    // set texture coordinate attribute
+    const vertexTexCoordAttribute = gl.getAttribLocation(this.program, 'a_vertexTextureCoord');
+    gl.enableVertexAttribArray(vertexTexCoordAttribute);
+    gl.vertexAttribPointer(vertexTexCoordAttribute, 2, gl.FLOAT, false, 0, 0);
+
+    this.textures = textures;
+
+    return textures;
   }
 
   // WebGLRenderingContext.uniform[1234][fi][v]()
