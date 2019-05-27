@@ -52,15 +52,15 @@ void main()
   vec2 idx = grid_index(st, grid);
   
   // st = grid_xy(st, grid);
-  st = lerp(st, vec2(-10, -10), vec2(10, 10));
+  st = lerp(vec2(-10, -10), vec2(10, 10), st);
 
   float stp = 0.1;
-  float thick = 0.5;
-  float smth = 0.06;
+  float thick = 0.8;
+  float smth = 0.2;
 
   // PLOT func, field, step, thick, smooth
-  float px = PLOT(fx, st, 0.1, 0.1, 0.02);
-  float py = PLOT(fy, st, 0.1, 0.1, 0.02);
+  float px = PLOT(fx, st, 0.1, 0.1, 0.2);
+  float py = PLOT(fy, st, 0.1, 0.1, 0.2);
 
   float p1 = PLOT(f1, st, stp, thick, smth);
   float p2 = PLOT(f2, st, stp, thick, smth);
@@ -77,8 +77,8 @@ void main()
   vec3 c4 = p4 * vec3(1.0, 0, 1.0);
   vec3 c5 = p5 * vec3(1.0, 0, 0);
   // float t = dd_time;
-  // vec3 color = pct * random_color(idx + dd_randseed);
-  // vec3 color = random_color(idx + dd_randseed);
+  // vec3 color = pct * random_color3(idx + dd_randseed);
+  // vec3 color = random_color3(idx + dd_randseed);
 	gl_FragColor = vec4(cx + cy + c1 + c2 + c3 + c4 + c5, 1.0);
   // gl_FragColor = vec4(c3, 1.0);
 }

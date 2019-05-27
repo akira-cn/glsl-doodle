@@ -6,7 +6,6 @@ precision mediump float;
 #pragma include <graph>
 #pragma include <color>
 #pragma include <pattern>
-#pragma include "./common.glsl"
 
 #define PI 3.14159265
 
@@ -14,7 +13,6 @@ uniform vec2 abc;
 uniform float dd_time;
 uniform vec2 dd_resolution;
 uniform vec2 dd_randseed;
-uniform vec2 dd_randseed0;
 
 void main()
 {
@@ -27,17 +25,15 @@ void main()
   
   float pct = 1.0;
 
-  if(random(idx + dd_randseed0) > 0.5) {
-    if(grid_odd_row(idx, grid)) {
-      st = scale(st, vec2(0, 0), vec2(-1.0, -1.0));
-    }
-
-    if(grid_odd(idx, grid)) {
-      pct = triangle(st, vec2(10, -10), vec2(10, 10), vec2(-10, 10), 0.05);
-    } else {
-      pct = triangle(st, vec2(-10, -10), vec2(-10, 10), vec2(10, 10), 0.05);
-    }
-
-    color(pct, random_color3(idx));
+  if(grid_odd_row(idx, grid)) {
+    st = scale(st, vec2(0, 0), vec2(-1.0, -1.0));
   }
+
+  if(grid_odd(idx, grid)) {
+    pct = triangle(st, vec2(10, -10), vec2(10, 10), vec2(-10, 10), 0.05);
+  } else {
+    pct = triangle(st, vec2(-10, -10), vec2(-10, 10), vec2(10, 10), 0.05);
+  }
+
+  color(pct, random_color3(idx));
 }

@@ -7,9 +7,10 @@ import DEFAULT_VERT from './default_vert.glsl';
 import DEFAULT_FRAG from './default_frag.glsl';
 import stdlib from './stdlib.glsl';
 import graph from './graph.glsl';
+import color from './color.glsl';
 import pattern from './pattern.glsl';
 
-const GLSL_LIBS = {stdlib, graph, pattern};
+const GLSL_LIBS = {stdlib, graph, color, pattern};
 
 export default class Doodle {
   static uniformTypes = {
@@ -108,7 +109,7 @@ export default class Doodle {
     gl.useProgram(program);
     this.program = program;
 
-    const vPosition = gl.getAttribLocation(this.program, 'vPosition');
+    const vPosition = gl.getAttribLocation(this.program, 'a_position');
     gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
 
@@ -118,11 +119,16 @@ export default class Doodle {
 
     this.declareUniforms({
       dd_time: '1f',
+      dd_randseed0: '2fv',
       dd_randseed: '2fv',
       dd_resolution: '2fv',
+      dd_rendercount: '1i',
     });
 
     this.uniforms.dd_time = 0.0;
+    this.uniforms.dd_randseed0 = [Math.random(), Math.random()];
+    this.uniforms.dd_randseed = this.uniforms.dd_randseed0;
+    this.uniforms.dd_rendercount = 0;
     this.uniforms.dd_resolution = [gl.canvas.width, gl.canvas.height];
 
     return program;
@@ -222,6 +228,7 @@ export default class Doodle {
 
     this.uniforms.dd_time = (Date.now() - this.startTime) / 1000;
     this.uniforms.dd_randseed = [Math.random(), Math.random()];
+    this.uniforms.dd_rendercount++;
 
     const gl = this.gl;
     gl.clear(gl.COLOR_BUFFER_BIT);
