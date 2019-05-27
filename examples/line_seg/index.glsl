@@ -5,7 +5,6 @@ precision mediump float;
 #pragma include <stdlib>
 #pragma include <graph>
 #pragma include <pattern>
-#pragma include "./common.glsl"
 
 #define PI 3.14159265
 
@@ -31,7 +30,7 @@ void main()
 
   st = m * st;
 
-  vec3 color = line_seg(st, vec2(-3.0, -3.0), vec2(3.0, 3.0), 1.0) * vec3(1.0, 1.0, 1.0);
+  vec3 color = line_seg(st, vec2(-3.0, -3.0), vec2(3.0, 3.0), 5.0, 1.0) * vec3(1.0, 1.0, 1.0);
 
   // float t = dd_time;
   // vec3 color = pct * random_color(idx + dd_randseed);

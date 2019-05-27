@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
-  <script src="js/glsl-doodle.js"></script>
+  <script src="/js/glsl-doodle.js"></script>
 </head>
 <body>
   <canvas id="glDoodle" width="512" height="512"></canvas>
@@ -13,19 +13,11 @@
     (async function () {
       const doodle = new Doodle(glDoodle);
 
-      // console.log(doodle);
-      await doodle.load('./index.glsl', './vert.glsl');
-      // await doodle.load('./graph-line.glsl');
+      await doodle.load('./index.glsl');
+      // await doodle.load('./math-curve.glsl');
 
       // doodle.declareUniforms({
       //   abc: '2fv',
-      // });
-
-      // doodle.clipPath({
-      //   type: 'circle',
-      //   cx: 100,
-      //   cy: 100,
-      //   r: 50,
       // });
 
       doodle.render({

@@ -4,7 +4,7 @@ precision mediump float;
 
 #pragma include <stdlib>
 #pragma include <graph>
-#pragma include "./common.glsl"
+#pragma include <pattern>
 
 #define PI 3.14159265
 
@@ -31,6 +31,7 @@ float f2(in float x) {
 
 float f3(in float x) {
   return sqrt(1.0 - x * x);
+  // return 0.0;
 }
 
 float f4(in float x) {
@@ -53,14 +54,19 @@ void main()
   // st = grid_xy(st, grid);
   st = lerp(st, vec2(-10, -10), vec2(10, 10));
 
-  float px = PLOT(fx, st, 0.1, 0.1);
-  float py = PLOT(fy, st, 0.1, 0.1);
+  float stp = 0.1;
+  float thick = 0.5;
+  float smth = 0.06;
 
-  float p1 = PLOT(f1, st, 0.1, 0.1);
-  float p2 = PLOT(f2, st, 0.1, 0.1);
-  float p3 = PLOT(f3, st, 0.1, 0.1);
-  float p4 = PLOT(f4, st, 0.1, 0.1);
-  float p5 = PLOT(f5, st, 0.1, 0.1);
+  // PLOT func, field, step, thick, smooth
+  float px = PLOT(fx, st, 0.1, 0.1, 0.02);
+  float py = PLOT(fy, st, 0.1, 0.1, 0.02);
+
+  float p1 = PLOT(f1, st, stp, thick, smth);
+  float p2 = PLOT(f2, st, stp, thick, smth);
+  float p3 = PLOT(f3, st, stp, thick, smth);
+  float p4 = PLOT(f4, st, stp, thick, smth);
+  float p5 = PLOT(f5, st, stp, thick, smth);
 
   vec3 cx = px * vec3(1.0, 1.0, 1.0);
   vec3 cy = py * vec3(1.0, 1.0, 1.0);
@@ -74,4 +80,5 @@ void main()
   // vec3 color = pct * random_color(idx + dd_randseed);
   // vec3 color = random_color(idx + dd_randseed);
 	gl_FragColor = vec4(cx + cy + c1 + c2 + c3 + c4 + c5, 1.0);
+  // gl_FragColor = vec4(c3, 1.0);
 }
