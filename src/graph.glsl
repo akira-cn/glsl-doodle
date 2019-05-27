@@ -76,24 +76,30 @@ struct box2 {
   vec2 d;
 };
 
-box2 create_box(in vec2 center, in vec2 size) {
-  vec2 a = center + size * vec2(-0.5, -0.5);
-  vec2 b = center + size * vec2(0.5, -0.5);
-  vec2 c = center + size * vec2(0.5, 0.5);
-  vec2 d = center + size * vec2(-0.5, 0.5);
-
-  return box2(a, b, c, d);
+vec2 center(in box2 box) {
+  return (box.a + box.c) * 0.5;
 }
 
-// whether a point is in a CONVEX quadrangle
-// bool in_convex_quadrangle(in vec2 p, in vec2 a, in vec2 b, in vec2 c, in vec2 d) {
-//   float pa = (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x);
-//   float pb = (c.x - b.x) * (p.y - b.y) - (c.y - b.y) * (p.x - b.x);
-//   float pc = (d.x - c.x) * (p.y - c.y) - (d.y - c.y) * (p.x - c.x);
-//   float pd = (a.x - d.x) * (p.y - d.y) - (a.y - d.y) * (p.x - d.x);
+box2 create_box(in vec2 point, in vec2 size, in vec2 anchor) {
+  vec2 a = point + size * (vec2(0.0) - anchor);
+  vec2 b = point + size * (vec2(1.0, 0.0) - anchor);
+  vec2 c = point + size * (vec2(1.0) - anchor);
+  vec2 d = point + size * (vec2(0.0, 1.0) - anchor);
 
-//   return (pa >= 0.0 && pb >= 0.0 && pc >= 0.0 && pd >= 0.0) || (pa <= 0.0 && pb <= 0.0 && pc <= 0.0 && pd <= 0.0);
-// }
+  return box2(a, b, c, d);  
+}
+
+box2 create_box(in vec2 point, in vec2 size) {
+  return create_box(point, size, vec2(0.0));
+}
+
+box2 create_box(in vec2 size) {
+  return create_box(vec2(0.0), size, vec2(0.0));
+}
+
+box2 create_box() {
+  return create_box(vec2(0.0), vec2(1.0), vec2(0.0));
+}
 
 vec2 box_quad(in vec2 p, in box2 box) {
   vec2 v1 = box.b - box.a;
@@ -105,8 +111,10 @@ vec2 box_quad(in vec2 p, in box2 box) {
   float d2 = vp.x * v2.y - vp.y * v2.x;
 
   if(d1 * d2 <= 0.0) {
-    float p1 = (vp.x * v1.x + vp.y * v1.y) / pow(length(v1), 2.0);
-    float p2 = (vp.x * v2.x + vp.y * v2.y) / pow(length(v2), 2.0);
+    float l1 = length(v1);
+    float l2 = length(v2);
+    float p1 = (vp.x * v1.x + vp.y * v1.y) / pow(l1, 2.0);
+    float p2 = (vp.x * v2.x + vp.y * v2.y) / pow(l2, 2.0);
 
     if(p1 >= 0.0 && p1 <= 1.0 && p2 >= 0.0 && p2 <= 1.0) {
       return vec2(p1, p2);
@@ -116,39 +124,50 @@ vec2 box_quad(in vec2 p, in box2 box) {
   return vec2(-1.0);
 }
 
-vec2 transform(in vec2 v0, in vec2 origin, mat3 matrix) {
-  vec3 v1 = vec3(v0 - origin, 1.0);
-  return vec2(v1 * matrix) + origin;
+vec2 transform(in vec2 v0, mat3 matrix) {
+  return vec2(vec3(v0, 1.0) * matrix);
 }
 
 vec2 translate(in vec2 v0, in vec2 xy) {
   mat3 m = mat3(1, 0, xy.x, 0, 1, xy.y, 0, 0, 1);
-  return transform(v0, vec2(0.0, 0.0), m);
+  return transform(v0, m);
 }
 
 vec2 scale(in vec2 v0, in vec2 origin, in vec2 scale) {
   mat3 m = mat3(scale.x, 0, 0, 0, scale.y, 0, 0, 0, 1);
-  return transform(v0, origin, m);
+  return transform(v0 - origin, m) + origin;
+}
+
+vec2 scale(in vec2 v0, in vec2 scaleXY) {
+  return scale(v0, vec2(0.0), scaleXY);
 }
 
 vec2 rotate(in vec2 v0, in vec2 origin, float ang) {
   float sinA = sin(ang);
   float cosA = cos(ang);
   mat3 m = mat3(cosA, sinA, 0, -sinA, cosA, 0, 0, 0, 1);
-  return transform(v0, origin, m);
+  return transform(v0 - origin, m) + origin;
+}
+
+vec2 rotate(in vec2 v0, float ang) {
+  return rotate(v0, vec2(0.0), ang);
 }
 
 vec2 skew(in vec2 v0, in vec2 origin, in vec2 skew) {
   mat3 m = mat3(1, tan(skew.y), 0, tan(skew.x), 1, 0, 0, 0, 1);
-  return transform(v0, origin, m);
+  return transform(v0 - origin, m) + origin;
 }
 
-box2 transform(in box2 box, in vec2 origin, mat3 matrix) {
+vec2 skew(in vec2 v0, in vec2 skewXY) {
+  return skew(v0, vec2(0.0), skewXY);
+}
+
+box2 transform(in box2 box, mat3 matrix) {
   return box2(
-    transform(box.a, origin, matrix),
-    transform(box.b, origin, matrix),
-    transform(box.c, origin, matrix),
-    transform(box.d, origin, matrix)
+    transform(box.a, matrix),
+    transform(box.b, matrix),
+    transform(box.c, matrix),
+    transform(box.d, matrix)
   );
 }
 
@@ -170,6 +189,15 @@ box2 scale(in box2 box, in vec2 origin, in vec2 scaleXY) {
   );
 }
 
+box2 scale(in box2 box, in vec2 scaleXY) {
+  return box2(
+    scale(box.a, scaleXY), 
+    scale(box.b, scaleXY), 
+    scale(box.c, scaleXY), 
+    scale(box.d, scaleXY)
+  );
+}
+
 box2 rotate(in box2 box, in vec2 origin, float ang) {
   return box2(
     rotate(box.a, origin, ang),
@@ -179,12 +207,30 @@ box2 rotate(in box2 box, in vec2 origin, float ang) {
   );
 }
 
+box2 rotate(in box2 box, float ang) {
+  return box2(
+    rotate(box.a, ang),
+    rotate(box.b, ang),
+    rotate(box.c, ang),
+    rotate(box.d, ang)
+  );
+}
+
 box2 skew(in box2 box, in vec2 origin, in vec2 skewXY) {
   return box2(
     skew(box.a, origin, skewXY),
     skew(box.b, origin, skewXY),
     skew(box.c, origin, skewXY),
     skew(box.d, origin, skewXY)
+  );
+}
+
+box2 skew(in box2 box, in vec2 skewXY) {
+  return box2(
+    skew(box.a, skewXY),
+    skew(box.b, skewXY),
+    skew(box.c, skewXY),
+    skew(box.d, skewXY)
   );
 }
 
