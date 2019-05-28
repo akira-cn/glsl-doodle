@@ -2,6 +2,8 @@
 
 #define M_GRAPH
 
+#pragma include <stdlib>
+
 /**
   定义： Unit Distance Field 单位距离场，值从 0.0~1.0，无限远处为0.0，最近处为1.0
   着色的时候取距离场的切面
@@ -144,6 +146,27 @@ UDF circle(in vec2 st, in vec2 c, in float r, in float smth) {
 }
 
 /**
+  计算扇形的 UDF
+ */
+UDF arc(in vec2 st, in vec2 c, in float r, in float sAng, in float eAng, in float smth) {
+  float ang = angle(st - c);
+  float d = length(st - c) / r;
+
+  if(d <= 1.0 && ang >= sAng && ang < eAng) {
+    vec2 v1 = vec2(r * cos(sAng), r * sin(sAng)) + c;
+    vec2 v2 = vec2(r * cos(eAng), r * sin(eAng)) + c;
+
+    float d1 = seg_distance(st, c, v1) / r;
+    float d2 = seg_distance(st, c, v2) / r;
+    float d3 = 1.0 - d;
+
+    // return distance_to_udf(d, 2.0 * r, smth);
+    return smoothstep(0.0, smth, min(d1, min(d2, d3)));
+  }
+  return 0.0;
+}
+
+/**
   计算椭圆的 UDF
 
   参数：
@@ -160,11 +183,35 @@ UDF ellipse(in vec2 st, in vec2 c, in float a, in float b, in float smth) {
   vec2 p = st - c;
   float dd = 1.0 - pow(p.x / a, 2.0) - pow(p.y / b, 2.0);
   
-  if(dd >= 0.0 && dd <= 1.0) {
+  if(dd >= 0.0) {
     return smoothstep(0.0, smth * smth, dd);
   }
   return 0.0;
 }
+
+UDF ellipse(in vec2 st, in vec2 c, in float a, in float b, in float sAng, in float eAng, in float smth) {
+  vec2 p = st - c;
+  float ang = angle(st - c);
+  float dd = pow(p.x / a, 2.0) + pow(p.y / b, 2.0);
+
+  vec2 v1 = vec2(a * cos(sAng), b * sin(sAng)) + c;
+  vec2 v2 = vec2(a * cos(eAng), b * sin(eAng)) + c;
+  return line_seg(st, c, v1, 0.01, 0.002) + line_seg(st, c, v2, 0.01, 0.002);
+
+  if(dd <= 1.0 && ang >= sAng && ang < eAng) {
+    vec2 v1 = vec2(a * cos(sAng), b * sin(sAng)) + c;
+    vec2 v2 = vec2(a * cos(eAng), b * sin(eAng)) + c;
+    
+    float d1 = seg_distance(st, c, v1) / max(a, b);
+    float d2 = seg_distance(st, c, v2) / max(a, b);
+    float d3 = 1.0 - dd;
+
+    return smoothstep(0.0, smth, min(d1, min(d2, d3)));
+    // return smoothstep(0.0, smth, d3);
+  }
+  return 0.0;
+}
+
 
 bool in_triangle(in vec2 p, in vec2 a, in vec2 b, in vec2 c) {
   float pa = (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x);
@@ -436,15 +483,29 @@ UDF udf_union(in UDF d1, in UDF d2) {
 }
 
 UDF udf_complement(in UDF d1, in UDF d2) {
-  if(d1 > 0.0 && d2 <= 0.0) {
-    return d1;
+  if(d1 > 0.0 && d2 > 0.0) {
+    if(d1 == 1.0 && d2 < 1.0) {
+      return 1.0 - d2;
+    }
+    if(d1 < 1.0 && d2 == 1.0) {
+      return 1.0 - d1;
+    }
+    if(d1 < 1.0 && d2 < 1.0) {
+      if(d1 > d2) {
+        if(d1 < 1.0 - d2) {
+          return d1;
+        }
+        return 1.0 - d2;
+      }
+      if(d2 < 1.0 - d1) {
+        return d2;
+      }
+      return 1.0 - d1;
+    }
+    return 0.0;
   }
-  if(d1 <= 0.0 && d2 > 0.0) {
-    return d2;
-  }
-  if(d1 < 1.0 && d2 > 0.0 || d2 < 1.0 && d2 > 0.0) {
-    return 1.0 - min(d1, d2);
-  }
+  if(d1 > 0.0) return d1;
+  if(d2 > 0.0) return d2;
   return 0.0;
 }
 

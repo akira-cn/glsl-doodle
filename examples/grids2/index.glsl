@@ -7,8 +7,6 @@ precision mediump float;
 #pragma include <color>
 #pragma include <pattern>
 
-#define PI 3.14159265
-
 uniform vec2 abc;
 uniform float dd_time;
 uniform vec2 dd_resolution;

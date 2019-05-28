@@ -8,8 +8,6 @@ precision mediump float;
 #pragma include <pattern>
 #pragma include "./common.glsl"
 
-#define PI 3.14159265
-
 uniform float dd_time;
 uniform vec2 dd_resolution;
 uniform vec2 dd_randseed;
@@ -20,7 +18,7 @@ void main()
 {
     vec2 st = gl_FragCoord.xy / dd_resolution.xy;
     vec3 color = vec3(0.0);
-
+    
     // st = polar(st, vec2(0.5));
 
     // float r = st.x;
@@ -34,9 +32,12 @@ void main()
 
     // color = vec3(1.0 - smoothstep(f - 0.01, f + 0.01, r));
     float d1 = rhombus(st, vec2(0.5), 0.5, 0.3, 0.02);
-    float d2 = circle(st, vec2(0.5), 0.4, 0.02);
+    float d2 = ellipse(st, vec2(0.5), 0.3, 0.2, 0.0,  0.25 * PI, 0.02);
+    float d3 = ellipse(st, vec2(0.5), 0.3, 0.2, 0.0,  0.5 * PI, 0.02);
+    // float d2 = arc(st, vec2(0.5), 0.3, 0.0,  0.25 * PI, 0.02);
 
-    color = vec3(udf_complement(d1, d2));
+    // color = vec3(udf_complement(d1, d2));
+    color = vec3(d2 + d3);
 
     gl_FragColor = vec4(color, 1.0);
 }
