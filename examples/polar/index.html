@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="/js/glsl-doodle.js"></script>
+</head>
+<body>
+  <canvas id="glDoodle" width="512" height="512"></canvas>
+  <script>
+    (async function () {
+      const doodle = new Doodle(glDoodle);
+
+      await doodle.load('./index.glsl');
+
+      doodle.render({
+        autoUpdate: true,
+      });
+
+      window.doodle = doodle;
+    }());
+  </script>
+</body>
+</html>

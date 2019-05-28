@@ -6,7 +6,6 @@ precision mediump float;
 #pragma include <graph>
 #pragma include <color>
 #pragma include <pattern>
-#pragma include "./common.glsl"
 
 #define PI 3.14159265
 
@@ -21,22 +20,19 @@ void main()
     vec2 st = gl_FragCoord.xy / dd_resolution.xy;
     vec3 color = vec3(0.0);
 
-    // st = polar(st, vec2(0.5));
+    st = rotate(st, vec2(0.5), dd_time);
+    st = polar(st, vec2(0.5));
 
-    // float r = st.x;
-    // float a = st.y;
+    float r = st.x;
+    float a = st.y;
 
-    // float f = cos(a * 3.0);
+    float f = cos(a * 100.0 * sin(dd_time / 2.0));
     // f = abs(cos(a*3.));
     // f = abs(cos(a*2.5))*.5+.3;
     // f = abs(cos(a*12.)*sin(a*3.))*.8+.1;
     // f = smoothstep(-.5,1., cos(a*10.))*0.2+0.5;
 
-    // color = vec3(1.0 - smoothstep(f - 0.01, f + 0.01, r));
-    float d1 = rhombus(st, vec2(0.5), 0.5, 0.3, 0.02);
-    float d2 = circle(st, vec2(0.5), 0.4, 0.02);
-
-    color = vec3(udf_complement(d1, d2));
+    color = vec3(1.0 - smoothstep(f, f + 0.02, r));
 
     gl_FragColor = vec4(color, 1.0);
 }

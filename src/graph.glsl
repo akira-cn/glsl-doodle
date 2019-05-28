@@ -2,11 +2,41 @@
 
 #define M_GRAPH
 
-#define PLOT(f, st, step, th, smth) plot_d(plot_distance(st, vec2(st.x - step, f(st.x - step)), vec2(st.x, f(st.x)), vec2(st.x + step, f(st.x + step))), th, smth)
+/**
+  定义： Unit Distance Field 单位距离场，值从 0.0~1.0，无限远处为0.0，最近处为1.0
+  着色的时候取距离场的切面
+ */
+#define UDF float
+
+/**
+  PLOT宏，用来绘制连续函数曲线
+  注意：PLOT适合绘制连续曲线，在局部不连续处可能失真
+
+  参数：
+    function f  曲线方程 y = f(x)
+    vec2 st     当前绘图坐标
+    float step  曲线采样间隔
+    float th    线条宽度
+    float smth  边缘模糊率，用于消除锯齿
+  
+  返回值：
+    UDF  距离场
+*/
+#define PLOT(f, st, step, th, smth) distance_to_udf(plot_distance(st, vec2(st.x - step, f(st.x - step)), vec2(st.x, f(st.x)), vec2(st.x + step, f(st.x + step))), th, smth)
 
 #define SPRITE(quad, f) if(quad.x >= 0.0 && quad.x <= 1.0) f(quad);
 
-// Get the distance that point between lineSeg(v1, v2)
+/**
+  求点到线段的距离
+
+  参数：
+    vec2 p  点坐标
+    vec2 v1 线段端点坐标
+    vec2 v2 线段端点坐标
+
+  返回值：
+    float   距离
+ */
 float seg_distance(in vec2 p, in vec2 v1, in vec2 v2) {
   vec2 pd = p - v1;
   vec2 pd2 = p - v2;
@@ -21,6 +51,18 @@ float seg_distance(in vec2 p, in vec2 v1, in vec2 v2) {
   return min(length(pd), length(pd2));
 }
 
+/**
+  取 p 到线段 v1v2 和 v2v3 两者中最近的距离
+
+  参数：
+    vec2 p 点坐标
+    vec2 v1 线段端点坐标
+    vec2 v2 线段端点坐标
+    vec2 v3 线段端点坐标
+
+  返回值：
+    float 距离
+ */
 float plot_distance(in vec2 p, in vec2 v1, in vec2 v2, in vec2 v3) {
   float d1 = seg_distance(p, v1, v2);
   float d2 = seg_distance(p, v2, v3);
@@ -28,19 +70,51 @@ float plot_distance(in vec2 p, in vec2 v1, in vec2 v2, in vec2 v3) {
   return min(d1, d2);
 }
 
-// plot_d by distance field
-float plot_d(in float d, in float thick, in float smth){
-  float th = 0.5 * thick;
-  smth = smth * thick;
+/**
+  将距离转换为单位距离场：UDF
+
+  参数：
+    float d 距离
+    float w 范围
+    float smth 边缘模糊率
+ */
+UDF distance_to_udf(in float d, in float w, in float smth) {
+  float th = 0.5 * w;
+  smth = smth * w;
   return smoothstep(-th, smth - th, d) - smoothstep(th - smth, th, d);
 }
 
-float line_seg(in vec2 st, in vec2 v1, in vec2 v2, in float thick, in float smth) {
+/**
+  计算线段的 UDF
+
+  参数：
+    vec2 st     当前坐标
+    vec2 v1     线段端点
+    vec2 v2     线段端点
+    float width 线段宽度
+    float smth  边缘模糊率
+
+  返回值：
+    UDF 距离场
+ */
+UDF line_seg(in vec2 st, in vec2 v1, in vec2 v2, in float width, in float smth) {
   float y = seg_distance(st, v1, v2);
-  return plot_d(y, thick, smth);
+  return distance_to_udf(y, width, smth);
 }
 
-float rect(in vec2 st, in vec2 p, in vec2 wh, in float smth) {
+/**
+  计算矩形的 UDF
+
+  参数：
+    vec2 st     当前坐标
+    vec2 p      矩形左下角坐标
+    vec2 wh     矩形宽高
+    float smth  边缘模糊率
+
+  返回值：
+    UDF 距离场
+ */
+UDF rect(in vec2 st, in vec2 p, in vec2 wh, in float smth) {
   vec2 v = (st - p) / wh; // show 0 ~ 1
   float x = v.x;
   float y = v.y;
@@ -52,23 +126,94 @@ float rect(in vec2 st, in vec2 p, in vec2 wh, in float smth) {
   return 0.0;
 }
 
-float circle(in vec2 st, in vec2 c, in float r, in float smth) {
+/**
+  计算圆的 UDF
+
+  参数：
+    vec2 st     当前坐标
+    vec2  c     圆心
+    float r     半径
+    float smth  边缘模糊率
+
+  返回值：
+    UDF 距离场
+ */
+UDF circle(in vec2 st, in vec2 c, in float r, in float smth) {
   float d = length(st - c);
-  return plot_d(d, 2.0 * r, smth);
+  return distance_to_udf(d, 2.0 * r, smth);
 }
 
-float triangle(in vec2 st, in vec2 a, in vec2 b, in vec2 c, in float smth) {
-  float pa = (b.x - a.x) * (st.y - a.y) - (b.y - a.y) * (st.x - a.x);
-  float pb = (c.x - b.x) * (st.y - b.y) - (c.y - b.y) * (st.x - b.x);
-  float pc = (a.x - c.x) * (st.y - c.y) - (a.y - c.y) * (st.x - c.x);
+/**
+  计算椭圆的 UDF
 
-  if(pa >= 0.0 && pb >= 0.0 && pc >= 0.0 || pa <= 0.0 && pb <= 0.0 && pc <= 0.0) {
+  参数：
+    vec2 st     当前坐标
+    vec2  c     中心
+    float a     x轴半径
+    float b     y轴半径
+    float smth  边缘模糊率
+
+  返回值：
+    UDF 距离场
+ */
+UDF ellipse(in vec2 st, in vec2 c, in float a, in float b, in float smth) {
+  vec2 p = st - c;
+  float dd = 1.0 - pow(p.x / a, 2.0) - pow(p.y / b, 2.0);
+  
+  if(dd >= 0.0 && dd <= 1.0) {
+    return smoothstep(0.0, smth * smth, dd);
+  }
+  return 0.0;
+}
+
+bool in_triangle(in vec2 p, in vec2 a, in vec2 b, in vec2 c) {
+  float pa = (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x);
+  float pb = (c.x - b.x) * (p.y - b.y) - (c.y - b.y) * (p.x - b.x);
+  float pc = (a.x - c.x) * (p.y - c.y) - (a.y - c.y) * (p.x - c.x);
+
+  return pa >= 0.0 && pb >= 0.0 && pc >= 0.0 || pa <= 0.0 && pb <= 0.0 && pc <= 0.0;
+}
+
+/**
+  计算三角形的 UDF
+
+  参数：
+    vec2 st     当前坐标
+    vec2  a     顶点
+    vec2  b     顶点
+    vec2  c     顶点
+    float smth  边缘模糊率
+
+  返回值：
+    UDF 距离场
+ */
+UDF triangle(in vec2 st, in vec2 a, in vec2 b, in vec2 c, in float smth) {
+  if(in_triangle(st, a, b, c)) {
     float d = min(min(seg_distance(st, a, b), seg_distance(st, b, c)), seg_distance(st, c, a));
     return smoothstep(0.0, smth, d);
   } 
   return 0.0; 
 }
 
+/**
+  计算菱形的 UDF
+ */
+UDF rhombus(in vec2 st, in vec2 cr, float w, float h, in float smth) {
+  vec2 a = cr - vec2(0.5 * w, 0);
+  vec2 b = cr - vec2(0, 0.5 * h);
+  vec2 c = cr + vec2(0.5 * w, 0);
+  vec2 d = cr + vec2(0, 0.5 * h);
+
+  if(in_triangle(st, a, b, c) || in_triangle(st, a, c, d)) {
+    float d = min(seg_distance(st, a, b), (min(seg_distance(st, b, c), min(seg_distance(st, c, d), seg_distance(st, d, a)))));
+    return smoothstep(0.0, smth, d);
+  }
+  return 0.0;
+}
+
+/**
+  box2 由四个点构成矩形或平行四边形
+ */
 struct box2 {
   vec2 a;
   vec2 b;
@@ -76,10 +221,24 @@ struct box2 {
   vec2 d;
 };
 
+/**
+  求 box2 的中心点
+ */
 vec2 center(in box2 box) {
   return (box.a + box.c) * 0.5;
 }
 
+/**
+  创建 box2
+
+  参数：
+    vec2 point  参考点
+    vec2 size   宽高
+    vec2 anchro 锚
+
+  返回值：
+    box2
+ */
 box2 create_box(in vec2 point, in vec2 size, in vec2 anchor) {
   vec2 a = point + size * (vec2(0.0) - anchor);
   vec2 b = point + size * (vec2(1.0, 0.0) - anchor);
@@ -101,6 +260,16 @@ box2 create_box() {
   return create_box(vec2(0.0), vec2(1.0), vec2(0.0));
 }
 
+/**
+  求一个坐标点 p 在 box 中的相对坐标值 （0 ~ 1）
+
+  参数：
+    vec2 p    坐标点
+    box2 box  当前 box 对象
+  
+  返回值：
+    vec2 单位坐标值
+ */
 vec2 box_quad(in vec2 p, in box2 box) {
   vec2 v1 = box.b - box.a;
   vec2 v2 = box.d - box.a;
@@ -124,6 +293,9 @@ vec2 box_quad(in vec2 p, in box2 box) {
   return vec2(-1.0);
 }
 
+/**
+  计算向量和 box 的 transform
+ */
 vec2 transform(in vec2 v0, mat3 matrix) {
   return vec2(vec3(v0, 1.0) * matrix);
 }
@@ -232,6 +404,48 @@ box2 skew(in box2 box, in vec2 skewXY) {
     skew(box.c, skewXY),
     skew(box.d, skewXY)
   );
+}
+
+/**
+  将直角坐标转为极坐标
+ */
+vec2 polar(vec2 st, vec2 c) {
+  vec2 p = c - st;
+  float r = length(p) * 2.0;
+  float a = atan(p.y, p.x);
+
+  return vec2(r, a);  
+}
+
+/**
+  complement(d1, d2, d3...) = complement(union(d1, d2, d3...), intersect(d1, d2, d3...))
+ */
+
+UDF udf_intersect(in UDF d1, in UDF d2) {
+  if(d1 > 0.0 && d2 > 0.0) {
+    return max(d1, d2);
+  }
+  return 0.0;
+}
+
+UDF udf_union(in UDF d1, in UDF d2) {
+  if(d1 > 0.0 || d2 > 0.0) {
+    return max(d1, d2);
+  }
+  return 0.0;
+}
+
+UDF udf_complement(in UDF d1, in UDF d2) {
+  if(d1 > 0.0 && d2 <= 0.0) {
+    return d1;
+  }
+  if(d1 <= 0.0 && d2 > 0.0) {
+    return d2;
+  }
+  if(d1 < 1.0 && d2 > 0.0 || d2 < 1.0 && d2 > 0.0) {
+    return 1.0 - min(d1, d2);
+  }
+  return 0.0;
 }
 
 #endif
