@@ -101,6 +101,7 @@ export default class Doodle {
   }
 
   setProgram(vertexShader, fragmentShader) {
+    this.clearTextures();
     this.deleteProgram();
 
     const gl = this.gl;
@@ -182,14 +183,20 @@ export default class Doodle {
     return program;
   }
 
-  async loadTextures(...sources) {
+  clearTextures() {
     const gl = this.gl;
-
     if(this.textures) {
       this.textures.forEach((texture) => {
         gl.deleteTexture(texture);
       });
+      this.textures = null;
     }
+  }
+
+  async loadTextures(...sources) {
+    const gl = this.gl;
+
+    this.clearTextures();
 
     const promises = sources.map(async (src, i) => {
       const source = await loadImage(src);
@@ -221,10 +228,12 @@ export default class Doodle {
 
     const textures = await Promise.all(promises);
 
+    const texVertexData = this.vertices.map(v => [0.5 * (v[0] + 1), 0.5 * (v[1] + 1)]);
+
     // texture coordinate data
     const trianglesTexCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, trianglesTexCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0]), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, pointsToBuffer(texVertexData), gl.STATIC_DRAW);
 
     // set texture coordinate attribute
     const vertexTexCoordAttribute = gl.getAttribLocation(this.program, 'a_vertexTextureCoord');
