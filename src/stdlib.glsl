@@ -2,8 +2,13 @@
 
 #define M_STDLIB
 
+#ifndef PI
 #define PI 3.141592653589793
+#endif
+
+#ifndef FLT_EPSILON
 #define FLT_EPSILON 0.000001
+#endif
 
 // https://math.stackexchange.com/questions/1098487/atan2-faster-approximation
 float atan2(in float dy, in float dx) {
@@ -23,7 +28,7 @@ float atan2(in vec2 v) {
 }
 
 /**
-  从 v1 到 v2 的逆时针夹角, 0 ~ 2 * PI
+  从 v1 相对 v2 的逆时针夹角, 0 ~ 2 * PI
  */
 float angle(in vec2 v1, in vec2 v2) {
   float ang = atan2(v1) - atan2(v2);
@@ -58,6 +63,21 @@ float random(vec2 st, float a, float b) {
 
 vec3 random_color3(vec2 st) {
   return vec3(random(st), random(st + 1.0), random(st + 2.0));
+}
+
+float noise(in vec2 st) {
+  vec2 i = floor(st);
+  vec2 f = fract(st);
+
+  // Four corners in 2D of a tile
+  float a = random(i);
+  float b = random(i + vec2(1.0, 0.0));
+  float c = random(i + vec2(0.0, 1.0));
+  float d = random(i + vec2(1.0, 1.0));
+
+  vec2 u = f * f * (3.0 - 2.0 * f);
+
+  return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }
 
 #endif

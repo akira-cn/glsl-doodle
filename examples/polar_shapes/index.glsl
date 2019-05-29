@@ -6,7 +6,6 @@ precision mediump float;
 #pragma include <graph>
 #pragma include <color>
 #pragma include <pattern>
-#pragma include "./common.glsl"
 
 uniform float dd_time;
 uniform vec2 dd_resolution;
@@ -19,8 +18,7 @@ void main()
     vec2 st = gl_FragCoord.xy / dd_resolution.xy;
     // st = lerp(vec2(-3, -3), vec2(3, 3), st);
 
-    vec3 color = vec3(shape_star(st));
-    // vec3 color = vec3(shape_clover(st, vec2(0.5), 4.0));
+    vec3 color = vec3(shape_clover(st, vec2(0.5), 4.0));
     // color = vec3(shape_bud(st, vec2(0.5), 12.0));
     // color = vec3(shape_gourd(st, vec2(0.5)));
     

@@ -28,7 +28,7 @@ void main()
 
   st = m * st;
 
-  float d = line_seg(st, vec2(-3.0, -3.0), vec2(3.0, 3.0));
+  float d = sdf_seg(st, vec2(-3.0, -3.0), vec2(3.0, 3.0));
   d = stroke(d, 5.0, 0.15);
 
   // float t = dd_time;

@@ -7,13 +7,17 @@
 /**
   有向距离场
  */
+#ifndef SDF
 #define SDF float
+#endif
 
 /**
   定义： Unit Distance Field 单位距离场，值从 0.0~1.0，无限远处为0.0，最近处为1.0
   stroke 和 fill 的时候取距离场的切面
  */
+#ifndef UDF
 #define UDF float
+#endif
 
 /**
   PLOT宏，用来绘制连续函数曲线
@@ -29,14 +33,14 @@
   返回值：
     UDF  距离场
 */
-#define PLOT(f, st, step) plot_distance(st, vec2(st.x - step, f(st.x - step)), vec2(st.x, f(st.x)), vec2(st.x + step, f(st.x + step)))
+#define PLOT(f, st, step) sdf_plot(st, vec2(st.x - step, f(st.x - step)), vec2(st.x, f(st.x)), vec2(st.x + step, f(st.x + step)))
 
 #define SPRITE(quad, f) if(quad.x >= 0.0 && quad.x <= 1.0) f(quad);
 
 /**
   点到直线的距离
  */
-float line_distance(in vec2 p, in vec2 v1, in vec2 v2) {
+SDF sdf_line(in vec2 p, in vec2 v1, in vec2 v2) {
   vec2 pd = p - v1;
   vec2 pd2 = p - v2;
   vec2 seg = v2 - v1;
@@ -44,7 +48,9 @@ float line_distance(in vec2 p, in vec2 v1, in vec2 v2) {
   return (pd.x * seg.y - pd.y * seg.x) / length(seg);
 }
 
-#define sdf_line line_distance
+SDF sdf_line(in vec2 p, in vec2 v) {
+  return sdf_line(p, vec2(0), v);
+}
 
 /**
   点到线段的距离
@@ -57,7 +63,7 @@ float line_distance(in vec2 p, in vec2 v1, in vec2 v2) {
   返回值：
     float   距离
  */
-float seg_distance(in vec2 p, in vec2 v1, in vec2 v2) {
+SDF sdf_seg(in vec2 p, in vec2 v1, in vec2 v2) {
   vec2 pd = p - v1;
   vec2 pd2 = p - v2;
   vec2 seg = v2 - v1;
@@ -71,8 +77,9 @@ float seg_distance(in vec2 p, in vec2 v1, in vec2 v2) {
   return min(length(pd), length(pd2));
 }
 
-#define sdf_seg seg_distance
-#define line_seg seg_distance
+SDF sdf_seg(in vec2 p, in vec2 v) {
+  return sdf_seg(p, vec2(0), v);
+}
 
 /**
   取 p 到线段 v1v2 和 v2v3 两者中最近的距离
@@ -84,11 +91,11 @@ float seg_distance(in vec2 p, in vec2 v1, in vec2 v2) {
     vec2 v3 线段端点坐标
 
   返回值：
-    float 距离
+    SDF 距离
  */
-float plot_distance(in vec2 p, in vec2 v1, in vec2 v2, in vec2 v3) {
-  float d1 = seg_distance(p, v1, v2);
-  float d2 = seg_distance(p, v2, v3);
+SDF sdf_plot(in vec2 p, in vec2 v1, in vec2 v2, in vec2 v3) {
+  float d1 = sdf_seg(p, v1, v2);
+  float d2 = sdf_seg(p, v2, v3);
 
   return min(d1, d2);
 }
@@ -488,23 +495,12 @@ box2 skew(in box2 box, in vec2 skewXY) {
 }
 
 /**
-  将直角坐标转为极坐标
- */
-vec2 polar(vec2 st, vec2 c) {
-  vec2 p = c - st;
-  float r = length(p) * 2.0;
-  float a = atan(p.y, p.x);
-
-  return vec2(r, a);  
-}
-
-/**
   complement(d1, d2, d3...) = complement(union(d1, d2, d3...), intersect(d1, d2, d3...))
  */
 
 UDF udf_intersect(in UDF d1, in UDF d2) {
   if(d1 > 0.0 && d2 > 0.0) {
-    return max(d1, d2);
+    return min(d1, d2);
   }
   return 0.0;
 }
@@ -516,31 +512,298 @@ UDF udf_union(in UDF d1, in UDF d2) {
   return 0.0;
 }
 
+// 无法消除锯齿
 UDF udf_complement(in UDF d1, in UDF d2) {
-  if(d1 > 0.0 && d2 > 0.0) {
-    if(d1 == 1.0 && d2 < 1.0) {
-      return 1.0 - d2;
-    }
-    if(d1 < 1.0 && d2 == 1.0) {
-      return 1.0 - d1;
-    }
-    if(d1 < 1.0 && d2 < 1.0) {
-      if(d1 > d2) {
-        if(d1 < 1.0 - d2) {
-          return d1;
-        }
-        return 1.0 - d2;
-      }
-      if(d2 < 1.0 - d1) {
-        return d2;
-      }
-      return 1.0 - d1;
-    }
-    return 0.0;
-  }
-  if(d1 > 0.0) return d1;
-  if(d2 > 0.0) return d2;
+  if(d1 > 0.0 && d2 == 0.0 || d1 == 0.0 && d2 > 0.0) return 1.0;
   return 0.0;
+}
+
+/**
+  将直角坐标转为极坐标
+ */
+vec2 polar(in vec2 st, in vec2 c) {
+  vec2 p = c - st;
+  float r = length(p) * 2.0;
+  float a = atan(p.y, p.x);
+
+  return vec2(r, a);  
+}
+
+/** 
+  polar shapes
+ */
+UDF shape_blade(in vec2 st, in vec2 center, in float num) {
+  vec2 pt = polar(st, vec2(center));
+  float x = pt.x;
+  float y = cos(pt.y * num);
+  return smoothstep(x - 0.01, x + 0.01, y);  
+}
+
+UDF shape_blade3(in vec2 st, in vec2 center) {
+  return shape_blade(st, center, 3.0);
+}
+
+UDF shape_blade3(in vec2 st) {
+  return shape_blade(st, vec2(0.5), 3.0);
+}
+
+UDF shape_blade4(in vec2 st, in vec2 center) {
+  return shape_blade(st, center, 4.0);
+}
+
+UDF shape_blade4(in vec2 st) {
+  return shape_blade(st, vec2(0.5), 4.0);
+}
+
+UDF shape_blade5(in vec2 st, in vec2 center) {
+  return shape_blade(st, center, 5.0);
+}
+
+UDF shape_blade5(in vec2 st) {
+  return shape_blade(st, vec2(0.5), 5.0);
+}
+
+UDF shape_infinity(in vec2 st, in vec2 center) {
+  return shape_blade(st, center, 2.0);
+}
+
+UDF shape_infinity(in vec2 st) {
+  return shape_blade(st, vec2(0.5), 2.0);
+}
+
+UDF shape_clover(in vec2 st, in vec2 center, in float num) {
+  vec2 pt = polar(st, vec2(center));
+  float x = pt.x;
+  float y = abs(cos(pt.y * num * 0.5));
+  return smoothstep(x - 0.01, x + 0.01, y);  
+}
+
+UDF shape_bean(in vec2 st, in vec2 center) {
+  return shape_clover(st, center, 1.0);
+}
+
+UDF shape_bean(in vec2 st) {
+  return shape_clover(st, vec2(0.5), 1.0);
+}
+
+UDF shape_apple(in vec2 st, in vec2 center) {
+  return shape_clover(vec2(st.y, st.x), center, 1.3);
+}
+
+UDF shape_apple(in vec2 st) {
+  return shape_clover(vec2(st.y, st.x), vec2(0.5), 1.3);
+}
+
+UDF shape_clover3(in vec2 st, in vec2 center) {
+  return shape_clover(st, center, 3.0);
+}
+
+UDF shape_clover3(in vec2 st) {
+  return shape_clover(st, vec2(0.5), 3.0);
+}
+
+UDF shape_clover4(in vec2 st, in vec2 center) {
+  return shape_clover(st, center, 4.0);
+}
+
+UDF shape_clover4(in vec2 st) {
+  return shape_clover(st, vec2(0.5), 4.0);
+}
+
+UDF shape_clover5(in vec2 st, in vec2 center) {
+  return shape_clover(st, center, 5.0);
+}
+
+UDF shape_clover5(in vec2 st) {
+  return shape_clover(st, vec2(0.5), 5.0);
+}
+
+UDF shape_flower(in vec2 st, in vec2 center, in float num) {
+  vec2 pt = polar(st, vec2(center));
+  float x = pt.x;
+  float y = abs(cos(pt.y * num * 0.5)) * 0.5 + 0.3;
+  return smoothstep(x - 0.01, x + 0.01, y);  
+}
+
+UDF shape_gourd(in vec2 st, in vec2 center) {
+  return shape_flower(vec2(st.y, st.x), center, 1.7);
+}
+
+UDF shape_gourd(in vec2 st) {
+  return shape_flower(vec2(st.y, st.x), vec2(0.5), 1.7);
+}
+
+UDF shape_flower3(in vec2 st, in vec2 center) {
+  return shape_flower(st, center, 3.0);
+}
+
+UDF shape_flower3(in vec2 st) {
+  return shape_flower(st, vec2(0.5), 3.0);
+}
+
+UDF shape_flower4(in vec2 st, in vec2 center) {
+  return shape_flower(st, center, 4.0);
+}
+
+UDF shape_flower4(in vec2 st) {
+  return shape_flower(st, vec2(0.5), 4.0);
+}
+
+UDF shape_flower5(in vec2 st, in vec2 center) {
+  return shape_flower(st, center, 5.0);
+}
+
+UDF shape_flower5(in vec2 st) {
+  return shape_flower(st, vec2(0.5), 5.0);
+}
+
+UDF shape_bud(in vec2 st, in vec2 center, in float num) {
+  vec2 pt = polar(st, vec2(center));
+  float x = pt.x;
+  float y = smoothstep(-0.5, 1.0, cos(pt.y * num)) * 0.2 + 0.5;
+  return smoothstep(x - 0.01, x + 0.01, y);  
+}
+
+UDF shape_bud5(in vec2 st, in vec2 center) {
+  return shape_bud(st, center, 5.0);
+}
+
+UDF shape_bud5(in vec2 st) {
+  return shape_bud(st, vec2(0.5), 5.0);
+}
+
+UDF shape_bud8(in vec2 st, in vec2 center) {
+  return shape_bud(st, center, 8.0);
+}
+
+UDF shape_bud8(in vec2 st) {
+  return shape_bud(st, vec2(0.5), 8.0);
+}
+
+UDF shape_bud10(in vec2 st, in vec2 center) {
+  return shape_bud(st, center, 10.0);
+}
+
+UDF shape_bud10(in vec2 st) {
+  return shape_bud(st, vec2(0.5), 10.0);
+}
+
+UDF shape_bud12(in vec2 st, in vec2 center) {
+  return shape_bud(st, center, 12.0);
+}
+
+UDF shape_bud12(in vec2 st) {
+  return shape_bud(st, vec2(0.5), 12.0);
+}
+
+SDF regular_polygon(in vec2 st, in vec2 center, in float r, float rotation, const int edges) {
+  vec2 p = st - center;
+  vec2 v0 = vec2(0, r); // 第一个顶点
+  v0 = rotate(v0, -rotation);
+
+  float a = 2.0 * PI / float(edges); // 每条边与中心点的夹角
+
+  float ang = angle(v0, p); // 取夹角
+  ang = floor(ang / a); // 在哪个区间
+
+  vec2 v1 = rotate(v0, a * ang); // 左顶点
+  vec2 v2 = rotate(v0, a * (ang + 1.0)); // 右顶点
+
+  float l = r * cos(0.5 * a);
+
+  float d = sdf_line(p, v1, v2);
+  return d / l;   
+}
+
+SDF regular_polygon(in vec2 st, in vec2 center, in float r, const int edges) {
+  return regular_polygon(st, center, r, 0.0, edges);
+}
+
+UDF shape_regular_polygon(in vec2 st, in vec2 center, const int edges) {
+  float d = regular_polygon(st, center, 0.45, edges);
+  return fill(d, 0.01);
+}
+
+// TODO: 处理锯齿
+UDF shape_star(in vec2 st, in vec2 center) {
+  float r = 0.45;
+  float d = regular_polygon(st, center, r, 5);
+  float a = -2.0 * PI / 5.0;
+
+  d = fill(d, 0.01);
+
+  vec2 v0 = vec2(0, r);
+  
+  for(int i = 0; i < 5; i++) {
+    vec2 v1 = rotate(v0, float(i) * a);
+    vec2 v2 = rotate(v0, float(i + 1) * a);
+    float l = length(v2 - v1);
+
+    float c = 0.5 / cos(PI / 5.0);
+
+    vec2 p = rotate(v2, v1, -PI / 5.0);
+    p += (1.0 - c) * (v1 - p);
+
+    float d2 = sdf_triangle(st - center, v1, v2, p);
+
+    d2 = fill(d2, 0.01);
+
+    d = udf_complement(d, d2);
+  }
+
+  return d;
+}
+
+UDF shape_star(in vec2 st) {
+  return shape_star(st, vec2(0.5));
+}
+
+UDF shape_triangle(in vec2 st, in vec2 center) {
+  return shape_regular_polygon(st, center, 3);
+}
+
+UDF shape_triangle(in vec2 st) {
+  return shape_regular_polygon(st, vec2(0.5), 3);
+}
+
+UDF shape_rhombus(in vec2 st, in vec2 center) {
+  return shape_regular_polygon(st, center, 4);
+}
+
+UDF shape_rhombus(in vec2 st) {
+  return shape_regular_polygon(st, vec2(0.5), 4);
+}
+
+UDF shape_pentagon(in vec2 st, in vec2 center) {
+  return shape_regular_polygon(st, center, 5);
+}
+
+UDF shape_pentagon(in vec2 st) {
+  return shape_regular_polygon(st, vec2(0.5), 5);
+}
+
+UDF shape_hexagon(in vec2 st, in vec2 center) {
+  return shape_regular_polygon(st, center, 6);
+}
+
+UDF shape_hexagon(in vec2 st) {
+  return shape_regular_polygon(st, vec2(0.5), 6);
+}
+
+UDF shape_heptagon(in vec2 st, in vec2 center) {
+  return shape_regular_polygon(st, center, 7);
+}
+
+UDF shape_heptagon(in vec2 st) {
+  return shape_regular_polygon(st, vec2(0.5), 7);
+}
+
+UDF shape_octagon(in vec2 st, in vec2 center) {
+  return shape_regular_polygon(st, center, 8);
+}
+
+UDF shape_octagon(in vec2 st) {
+  return shape_regular_polygon(st, vec2(0.5), 8);
 }
 
 #endif
