@@ -18,7 +18,8 @@ void main()
 
   st = polar(st, vec2(0.5));
 
-	vec3 color = vec3(ellipse(st, vec2(0.5), 0.5, 0.3, 0.2));
+	float d = sdf_ellipse(st, vec2(0.5), 0.5, 0.3);
+	vec3 color = vec3(fill(d, 0.02));
 
 	gl_FragColor = vec4(color, 1.0);
 }

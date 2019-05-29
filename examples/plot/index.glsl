@@ -57,23 +57,23 @@ void main()
   float smth = 0.2;
 
   // PLOT func, field, step, thick, smooth
-  float px = PLOT(fx, st, 0.1, 0.1, 0.2);
-  float py = PLOT(fy, st, 0.1, 0.1, 0.2);
+  float px = PLOT(fx, st, 0.1);
+  float py = PLOT(fy, st, 0.1);
 
-  float p1 = PLOT(f1, st, stp, thick, smth);
-  float p2 = PLOT(f2, st, stp, thick, smth);
-  float p3 = PLOT(f3, st, stp, thick, smth);
-  float p4 = PLOT(f4, st, stp, thick, smth);
-  float p5 = PLOT(f5, st, stp, thick, smth);
+  float p1 = PLOT(f1, st, stp);
+  float p2 = PLOT(f2, st, stp);
+  float p3 = PLOT(f3, st, stp);
+  float p4 = PLOT(f4, st, stp);
+  float p5 = PLOT(f5, st, stp);
 
-  vec3 cx = px * vec3(1.0, 1.0, 1.0);
-  vec3 cy = py * vec3(1.0, 1.0, 1.0);
+  vec3 cx = stroke(px, 0.1, 0.2) * vec3(1.0, 1.0, 1.0);
+  vec3 cy = stroke(py, 0.1, 0.2) * vec3(1.0, 1.0, 1.0);
 
-  vec3 c1 = p1 * vec3(0, 1.0, 0);
-  vec3 c2 = p2 * vec3(0, 1.0, 1.0);
-  vec3 c3 = p3 * vec3(1.0, 1.0, 0);
-  vec3 c4 = p4 * vec3(1.0, 0, 1.0);
-  vec3 c5 = p5 * vec3(1.0, 0, 0);
+  vec3 c1 = stroke(p1, thick, smth) * vec3(0, 1.0, 0);
+  vec3 c2 = stroke(p2, thick, smth) * vec3(0, 1.0, 1.0);
+  vec3 c3 = stroke(p3, thick, smth) * vec3(1.0, 1.0, 0);
+  vec3 c4 = stroke(p4, thick, smth) * vec3(1.0, 0, 1.0);
+  vec3 c5 = stroke(p5, thick, smth) * vec3(1.0, 0, 0);
   // float t = dd_time;
   // vec3 color = pct * random_color3(idx + dd_randseed);
   // vec3 color = random_color3(idx + dd_randseed);

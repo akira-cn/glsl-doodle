@@ -24,6 +24,6 @@ void main()
   box = scale(box, center(box), vec2(random(idx, 0.1, 0.9)));
   st = box_quad(st, box);
 
-  float pct = rect(st, vec2(0), vec2(1.0), 0.0);
-  color(pct, random_color3(idx + dd_randseed0));
+  float pct = sdf_rect(st, vec2(0), 1.0, 1.0);
+  color(fill(pct, 0.0), random_color3(idx + dd_randseed0));
 }

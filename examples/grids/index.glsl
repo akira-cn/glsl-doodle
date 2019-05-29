@@ -30,11 +30,11 @@ void main()
     }
 
     if(grid_odd(idx, grid)) {
-      pct = triangle(st, vec2(10, -10), vec2(10, 10), vec2(-10, 10), 0.05);
+      pct = sdf_triangle(st, vec2(10, -10), vec2(10, 10), vec2(-10, 10));
     } else {
-      pct = triangle(st, vec2(-10, -10), vec2(-10, 10), vec2(10, 10), 0.05);
+      pct = sdf_triangle(st, vec2(-10, -10), vec2(-10, 10), vec2(10, 10));
     }
 
-    color(pct, random_color3(idx));
+    color(fill(pct, 0.05), random_color3(idx));
   }
 }

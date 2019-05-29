@@ -28,10 +28,11 @@ void main()
 
   st = m * st;
 
-  vec3 color = line_seg(st, vec2(-3.0, -3.0), vec2(3.0, 3.0), 5.0, 0.15) * vec3(1.0, 1.0, 1.0);
+  float d = line_seg(st, vec2(-3.0, -3.0), vec2(3.0, 3.0));
+  d = stroke(d, 5.0, 0.15);
 
   // float t = dd_time;
   // vec3 color = pct * random_color(idx + dd_randseed);
   // vec3 color = random_color3(idx + dd_randseed);
-	gl_FragColor = vec4(color, 1.0);
+	gl_FragColor = vec4(vec3(d), 1.0);
 }

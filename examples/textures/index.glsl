@@ -29,9 +29,9 @@ void main()
   st = box_quad(st, box);
   // st = st * 2.0;
 
-  float pct = rect(st, vec2(0), vec2(1.0), 0.0);
+  float pct = sdf_rect(st, vec2(0), 1.0, 1.0);
   // color(pct, vec3(1.0, 0, 0));
   // color(pct, random_color3(idx + 1001.0));
 
-  gl_FragColor = pct * texture2D(dd_sampler0, vTextureCoord) * texture2D(dd_sampler1, vTextureCoord);
+  gl_FragColor = fill(pct, 0.0) * texture2D(dd_sampler0, vTextureCoord) * texture2D(dd_sampler1, vTextureCoord);
 }

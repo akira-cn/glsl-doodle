@@ -5,8 +5,13 @@
 #pragma include <stdlib>
 
 /**
+  有向距离场
+ */
+#define SDF float
+
+/**
   定义： Unit Distance Field 单位距离场，值从 0.0~1.0，无限远处为0.0，最近处为1.0
-  着色的时候取距离场的切面
+  stroke 和 fill 的时候取距离场的切面
  */
 #define UDF float
 
@@ -24,12 +29,25 @@
   返回值：
     UDF  距离场
 */
-#define PLOT(f, st, step, th, smth) distance_to_udf(plot_distance(st, vec2(st.x - step, f(st.x - step)), vec2(st.x, f(st.x)), vec2(st.x + step, f(st.x + step))), th, smth)
+#define PLOT(f, st, step) plot_distance(st, vec2(st.x - step, f(st.x - step)), vec2(st.x, f(st.x)), vec2(st.x + step, f(st.x + step)))
 
 #define SPRITE(quad, f) if(quad.x >= 0.0 && quad.x <= 1.0) f(quad);
 
 /**
-  求点到线段的距离
+  点到直线的距离
+ */
+float line_distance(in vec2 p, in vec2 v1, in vec2 v2) {
+  vec2 pd = p - v1;
+  vec2 pd2 = p - v2;
+  vec2 seg = v2 - v1;
+
+  return (pd.x * seg.y - pd.y * seg.x) / length(seg);
+}
+
+#define sdf_line line_distance
+
+/**
+  点到线段的距离
 
   参数：
     vec2 p  点坐标
@@ -52,6 +70,9 @@ float seg_distance(in vec2 p, in vec2 v1, in vec2 v2) {
 
   return min(length(pd), length(pd2));
 }
+
+#define sdf_seg seg_distance
+#define line_seg seg_distance
 
 /**
   取 p 到线段 v1v2 和 v2v3 两者中最近的距离
@@ -86,176 +107,189 @@ UDF distance_to_udf(in float d, in float w, in float smth) {
   return smoothstep(-th, smth - th, d) - smoothstep(th - smth, th, d);
 }
 
-/**
-  计算线段的 UDF
+UDF stroke(in SDF d, in float d0, in float w, in float smth) {
+  float th = 0.5 * w;
+  smth = smth * w;
+  float start = d0 - th;
+  float end = d0 + th; 
+  return smoothstep(start, start + smth, d) - smoothstep(end - smth, end, d);
+}
 
-  参数：
-    vec2 st     当前坐标
-    vec2 v1     线段端点
-    vec2 v2     线段端点
-    float width 线段宽度
-    float smth  边缘模糊率
-
-  返回值：
-    UDF 距离场
- */
-UDF line_seg(in vec2 st, in vec2 v1, in vec2 v2, in float width, in float smth) {
-  float y = seg_distance(st, v1, v2);
-  return distance_to_udf(y, width, smth);
+UDF stroke(in SDF d, in float w, in float smth) {
+  return stroke(d, 0.0, w, smth);
 }
 
 /**
-  计算矩形的 UDF
-
-  参数：
-    vec2 st     当前坐标
-    vec2 p      矩形左下角坐标
-    vec2 wh     矩形宽高
-    float smth  边缘模糊率
-
-  返回值：
-    UDF 距离场
+  三角形的 SDF
  */
-UDF rect(in vec2 st, in vec2 p, in vec2 wh, in float smth) {
-  vec2 v = (st - p) / wh; // show 0 ~ 1
-  float x = v.x;
-  float y = v.y;
+SDF sdf_triangle(in vec2 st, in vec2 a, in vec2 b, in vec2 c) {
+  vec2 va = a - b;
+  vec2 vb = b - c;
+  vec2 vc = c - a;
 
-  if(x >= 0.0 && x <= 1.0 && y >= 0.0 && y <= 1.0) {
-    float d = 2.0 * min(min(y, 1.0 - y), min(x, 1.0 - x)); // 1 ~ 0
-    return smoothstep(0.0, smth, d);
+  float d1 = sdf_line(st, a, b);
+  float d2 = sdf_line(st, b, c);
+  float d3 = sdf_line(st, c, a);
+
+  // 三角形内切圆半径
+  float l = abs(va.x * vb.y - va.y * vb.x) / (length(va) + length(vb) + length(vc));
+
+  if(d1 >= 0.0 && d2 >= 0.0 && d3 >= 0.0 || d1 <= 0.0 && d2 <= 0.0 && d3 <= 0.0) {
+    return min(abs(d1), min(abs(d2), abs(d3))) / l;
   }
-  return 0.0;
+
+  d1 = sdf_seg(st, a, b);
+  d2 = sdf_seg(st, b, c);
+  d3 = sdf_seg(st, c, a);
+  return -min(abs(d1), min(abs(d2), abs(d3))) / l;
 }
 
-/**
-  计算圆的 UDF
+SDF sdf_rect(in vec2 st, in vec2 p, float w, float h) {
+  vec2 a = p;
+  vec2 b = p + vec2(w, 0.0);
+  vec2 c = p + vec2(w, h);
+  vec2 d = p + vec2(0.0, h);
 
-  参数：
-    vec2 st     当前坐标
-    vec2  c     圆心
-    float r     半径
-    float smth  边缘模糊率
+  vec2 va = a - b;
+  vec2 vb = b - c;
+  vec2 vc = c - d;
+  vec2 vd = d - a;
 
-  返回值：
-    UDF 距离场
- */
-UDF circle(in vec2 st, in vec2 c, in float r, in float smth) {
-  float d = length(st - c);
-  return distance_to_udf(d, 2.0 * r, smth);
-}
+  float d1 = sdf_line(st, a, b);
+  float d2 = sdf_line(st, b, c);
+  float d3 = sdf_line(st, c, d);
+  float d4 = sdf_line(st, d, a);
 
-/**
-  计算扇形的 UDF
- */
-UDF arc(in vec2 st, in vec2 c, in float r, in float sAng, in float eAng, in float smth) {
-  float ang = angle(st - c);
-  float d = length(st - c) / r;
+  float l = min(w, h) * 0.5; // 矩形短边
 
-  if(d <= 1.0 && ang >= sAng && ang < eAng) {
-    vec2 v1 = vec2(r * cos(sAng), r * sin(sAng)) + c;
-    vec2 v2 = vec2(r * cos(eAng), r * sin(eAng)) + c;
-
-    float d1 = seg_distance(st, c, v1) / r;
-    float d2 = seg_distance(st, c, v2) / r;
-    float d3 = 1.0 - d;
-
-    // return distance_to_udf(d, 2.0 * r, smth);
-    return smoothstep(0.0, smth, min(d1, min(d2, d3)));
+  if(d1 >= 0.0 && d2 >= 0.0 && d3 >= 0.0 && d4 >= 0.0 ||
+     d1 <= 0.0 && d2 <= 0.0 && d3 <= 0.0 && d4 <= 0.0) {
+    return min(abs(d1), min(abs(d2), min(abs(d3), abs(d4)))) / l;
   }
-  return 0.0;
+
+  d1 = sdf_seg(st, a, b);
+  d2 = sdf_seg(st, b, c);
+  d3 = sdf_seg(st, c, d);
+  d4 = sdf_seg(st, d, a);
+
+  return -min(abs(d1), min(abs(d2), min(abs(d3), abs(d4)))) / l;
 }
 
-/**
-  计算椭圆的 UDF
+SDF sdf_circle(in vec2 st, in vec2 c, float r) {
+  return 1.0 - length(st - c) / r;
+}
 
-  参数：
-    vec2 st     当前坐标
-    vec2  c     中心
-    float a     x轴半径
-    float b     y轴半径
-    float smth  边缘模糊率
-
-  返回值：
-    UDF 距离场
- */
-UDF ellipse(in vec2 st, in vec2 c, in float a, in float b, in float smth) {
+SDF sdf_ellipse(in vec2 st, in vec2 c, in float a, in float b) {
   vec2 p = st - c;
-  float dd = 1.0 - pow(p.x / a, 2.0) - pow(p.y / b, 2.0);
+  return 1.0 - sqrt(pow(p.x / a, 2.0) + pow(p.y / b, 2.0));
+}
+
+SDF sdf_ellipse(in vec2 st, in vec2 c, in float a, in float b, in float sAng, in float eAng) {
+  vec2 ua = vec2(cos(sAng), sin(sAng));
+  vec2 ub = vec2(cos(eAng), sin(eAng));
+
+  float d1 = sdf_line(st, c, ua + c);
+  float d2 = sdf_line(st, c, ub + c);
+
+  float d3 = sdf_ellipse(st, c, a, b);
+  float r = min(a, b);
+
+  vec2 v = st - c;
+  float ang = angle(v, vec2(1.0, 0));
+
+  if(eAng - sAng > 2.0 * PI) {
+    return d3;
+  }
+
+  if(ang >= sAng && ang <= eAng) { // 两个向量夹角中间的部分
+    float m = max(a, b);
+    float d11 = sdf_seg(st, c, ua * m + c);
+    float d12 = sdf_seg(st, c, ub * m + c);
+    if(d3 >= 0.0) {
+      return min(abs(d11 / r), min(abs(d12 / r), d3));
+    }
+    return d3;
+  }
   
-  if(dd >= 0.0) {
-    return smoothstep(0.0, smth * smth, dd);
+  float pa = dot(ua, v); // 求投影
+  float pb = dot(ub, v);
+
+  if(pa < 0.0 && pb < 0.0) {
+    return -length(st - c) / r;
   }
-  return 0.0;
-}
 
-UDF ellipse(in vec2 st, in vec2 c, in float a, in float b, in float sAng, in float eAng, in float smth) {
-  vec2 p = st - c;
-  float ang = angle(st - c);
-  float dd = pow(p.x / a, 2.0) + pow(p.y / b, 2.0);
-
-  vec2 v1 = vec2(a * cos(sAng), b * sin(sAng)) + c;
-  vec2 v2 = vec2(a * cos(eAng), b * sin(eAng)) + c;
-  return line_seg(st, c, v1, 0.01, 0.002) + line_seg(st, c, v2, 0.01, 0.002);
-
-  if(dd <= 1.0 && ang >= sAng && ang < eAng) {
-    vec2 v1 = vec2(a * cos(sAng), b * sin(sAng)) + c;
-    vec2 v2 = vec2(a * cos(eAng), b * sin(eAng)) + c;
-    
-    float d1 = seg_distance(st, c, v1) / max(a, b);
-    float d2 = seg_distance(st, c, v2) / max(a, b);
-    float d3 = 1.0 - dd;
-
-    return smoothstep(0.0, smth, min(d1, min(d2, d3)));
-    // return smoothstep(0.0, smth, d3);
+  if(d1 > 0.0 && pa >= 0.0) {
+    vec2 va = pa * ua;
+    float da = pow(va.x / a, 2.0) + pow(va.y / b, 2.0);
+    if(d3 > 0.0 || da <= pow(1.0 + abs(d1 / r), 2.0)) {
+      return -abs(d1 / r);
+    } else {
+      return d3;
+    }
   }
-  return 0.0;
+
+  if(d2 < 0.0 && pb >= 0.0) {
+    vec2 vb = pb * ub;
+    float db = pow(vb.x / a, 2.0) + pow(vb.y / b, 2.0);
+    if(d3 >= 0.0 || db <= pow(1.0 + abs(d2 / r), 2.0)) {
+      return -abs(d2 / r);
+    } else {
+      return d3;
+    }
+  }
 }
 
-
-bool in_triangle(in vec2 p, in vec2 a, in vec2 b, in vec2 c) {
-  float pa = (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x);
-  float pb = (c.x - b.x) * (p.y - b.y) - (c.y - b.y) * (p.x - b.x);
-  float pc = (a.x - c.x) * (p.y - c.y) - (a.y - c.y) * (p.x - c.x);
-
-  return pa >= 0.0 && pb >= 0.0 && pc >= 0.0 || pa <= 0.0 && pb <= 0.0 && pc <= 0.0;
+SDF sdf_arc(in vec2 st, in vec2 c, float r, in float sAng, in float eAng) {
+  return sdf_ellipse(st, c, r, r, sAng, eAng);
 }
 
-/**
-  计算三角形的 UDF
-
-  参数：
-    vec2 st     当前坐标
-    vec2  a     顶点
-    vec2  b     顶点
-    vec2  c     顶点
-    float smth  边缘模糊率
-
-  返回值：
-    UDF 距离场
- */
-UDF triangle(in vec2 st, in vec2 a, in vec2 b, in vec2 c, in float smth) {
-  if(in_triangle(st, a, b, c)) {
-    float d = min(min(seg_distance(st, a, b), seg_distance(st, b, c)), seg_distance(st, c, a));
-    return smoothstep(0.0, smth, d);
-  } 
-  return 0.0; 
-}
-
-/**
-  计算菱形的 UDF
- */
-UDF rhombus(in vec2 st, in vec2 cr, float w, float h, in float smth) {
+SDF sdf_rhombus(in vec2 st, in vec2 cr, float w, float h) {
   vec2 a = cr - vec2(0.5 * w, 0);
   vec2 b = cr - vec2(0, 0.5 * h);
   vec2 c = cr + vec2(0.5 * w, 0);
   vec2 d = cr + vec2(0, 0.5 * h);
 
-  if(in_triangle(st, a, b, c) || in_triangle(st, a, c, d)) {
-    float d = min(seg_distance(st, a, b), (min(seg_distance(st, b, c), min(seg_distance(st, c, d), seg_distance(st, d, a)))));
-    return smoothstep(0.0, smth, d);
+  vec2 va = a - b;
+  vec2 vb = b - c;
+  vec2 vc = c - d;
+  vec2 vd = d - a;
+
+  float d1 = sdf_line(st, a, b);
+  float d2 = sdf_line(st, b, c);
+  float d3 = sdf_line(st, c, d);
+  float d4 = sdf_line(st, d, a);
+
+  float l = min(w, h) * 0.5; // 矩形短边
+
+  if(d1 >= 0.0 && d2 >= 0.0 && d3 >= 0.0 && d4 >= 0.0 ||
+     d1 <= 0.0 && d2 <= 0.0 && d3 <= 0.0 && d4 <= 0.0) {
+    return min(abs(d1), min(abs(d2), min(abs(d3), abs(d4)))) / l;
   }
-  return 0.0;
+
+  d1 = sdf_seg(st, a, b);
+  d2 = sdf_seg(st, b, c);
+  d3 = sdf_seg(st, c, d);
+  d4 = sdf_seg(st, d, a);
+
+  return -min(abs(d1), min(abs(d2), min(abs(d3), abs(d4)))) / l;  
+}
+
+UDF fill(in SDF d, in float start, in float end, in float smth_start, float smth_end) {
+  smth_start = (end - start) * smth_start;
+  smth_end = (end - start) * smth_end;
+  return smoothstep(start, start + smth_start, d) - smoothstep(end - smth_end, end, d);
+}
+
+UDF fill(in SDF d, in float start, in float end, in float smth) {
+  return fill(d, start, end, smth, smth);
+}
+
+UDF fill(in SDF d, in float start, in float smth) {
+  return fill(d, start, 1.0, smth, 0.0);
+}
+
+UDF fill(in SDF d, in float smth) {
+  return fill(d, 0.0, 1.0, smth, 0.0);
 }
 
 /**

@@ -16,8 +16,8 @@ void draw(in vec2 st) {
   vec2 grid = vec2(3, 3);
   vec2 idx = grid_index(st, grid);
   st = lerp(vec2(-10, -10), vec2(10, 10), st);
-  float pct = circle(st, vec2(0, 0), 8.0, 0.05);
-  color(pct, random_color3(idx));
+  float pct = sdf_circle(st, vec2(0, 0), 8.0);
+  color(fill(pct, 0.05), random_color3(idx));
 }
 
 void main()
