@@ -49,8 +49,12 @@ float random(vec2 st, float a, float b) {
   return mix(a, b, p);
 }
 
-vec3 random_color3(vec2 st) {
-  return vec3(random(st), random(st + 1.0), random(st + 2.0));
+vec2 random2(vec2 st) {
+  return fract(sin(vec2(dot(st, vec2(127.1,311.7)),dot(st, vec2(269.5,183.3)))) * 43758.5453);
+}
+
+vec3 random3(vec2 st) {
+  return vec3(random2(st), random(st));
 }
 
 float noise(in vec2 st) {

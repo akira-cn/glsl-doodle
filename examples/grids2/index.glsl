@@ -24,5 +24,5 @@ void main() {
   st = box_quad(st, box);
 
   float pct = sdf_rect(st, vec2(0), 1.0, 1.0);
-  color(fill(pct, 0.0), random_color3(idx + dd_randseed0));
+  color(fill(pct, 0.0), random3(idx + dd_randseed0));
 }

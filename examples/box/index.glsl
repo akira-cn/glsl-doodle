@@ -10,14 +10,14 @@ precision mediump float;
 uniform vec2 abc;
 uniform float dd_time;
 uniform vec2 dd_resolution;
-uniform vec2 dd_randseed;
+uniform vec2 dd_randseed0;
 
 void draw(in vec2 st) {
   vec2 grid = vec2(3, 3);
   vec2 idx = grid_index(st, grid);
   st = mix(vec2(-10, -10), vec2(10, 10), st);
   float pct = sdf_circle(st, vec2(0, 0), 8.0);
-  color(fill(pct, 0.05), random_color3(idx));
+  color(fill(pct, 0.05), random3(idx + dd_randseed0));
 }
 
 void main()

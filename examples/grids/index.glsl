@@ -34,6 +34,6 @@ void main() {
       pct = sdf_triangle(st, vec2(-10, -10), vec2(-10, 10), vec2(10, 10));
     }
 
-    color(fill(pct, 0.05), random_color3(idx));
+    color(fill(pct, 0.05), random3(idx));
   }
 }
