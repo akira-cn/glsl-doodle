@@ -559,6 +559,10 @@ vec2 polar(in vec2 st, in vec2 c) {
   return vec2(r, a);  
 }
 
+vec2 polar(in vec2 st) {
+  return polar(st, vec2(0.5));
+}
+
 /** 
   polar shapes
  */
