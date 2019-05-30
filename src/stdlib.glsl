@@ -49,27 +49,27 @@ float random(vec2 st, float a, float b) {
   return mix(a, b, p);
 }
 
-vec2 random2(vec2 st) {
-  return fract(sin(vec2(dot(st, vec2(127.1,311.7)),dot(st, vec2(269.5,183.3)))) * 43758.5453);
+vec2 random2(vec2 st){
+  st = vec2(dot(st,vec2(127.1,311.7)), dot(st,vec2(269.5,183.3)));
+  return -1.0 + 2.0*fract(sin(st)*43758.5453123);
 }
 
 vec3 random3(vec2 st) {
   return vec3(random2(st), random(st));
 }
 
+// Value Noise by Inigo Quilez - iq/2013
+// https://www.shadertoy.com/view/lsf3WH
 float noise(in vec2 st) {
   vec2 i = floor(st);
   vec2 f = fract(st);
 
-  // Four corners in 2D of a tile
-  float a = random(i);
-  float b = random(i + vec2(1.0, 0.0));
-  float c = random(i + vec2(0.0, 1.0));
-  float d = random(i + vec2(1.0, 1.0));
-
   vec2 u = f * f * (3.0 - 2.0 * f);
 
-  return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+  return 0.5 * mix(mix(dot(random2(i + vec2(0.0,0.0)), f - vec2(0.0,0.0)),
+    dot(random2(i + vec2(1.0,0.0)), f - vec2(1.0,0.0)), u.x),
+    mix(dot(random2(i + vec2(0.0,1.0)), f - vec2(0.0,1.0)),
+    dot(random2(i + vec2(1.0,1.0)), f - vec2(1.0,1.0)), u.x), u.y) + 0.5;
 }
 
 #endif
