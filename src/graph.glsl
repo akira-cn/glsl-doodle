@@ -130,6 +130,10 @@ UDF stroke(in SDF d, in float w, in float smth) {
   return stroke(d, 0.0, w, smth);
 }
 
+UDF stroke(in SDF d, in float w) {
+  return stroke(d, 0.0, w, 0.0);
+}
+
 /**
   三角形的 SDF
  */

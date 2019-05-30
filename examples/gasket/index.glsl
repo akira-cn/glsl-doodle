@@ -21,12 +21,12 @@ SDF gasket(in vec2 st, in vec2 a, in vec2 b, in vec2 c) {
     vec2 ac = mix(a, c, 0.5);
     vec2 bc = mix(b, c, 0.5);
 
-    if(sdf_triangle(st, a, ab, ac) > 0.0) {
+    if(sdf_triangle(st, a, ab, ac) >= 0.0) {
       b = ab;
       c = ac;
       continue;
     }
-    if(sdf_triangle(st, c, ac, bc) > 0.0) {
+    if(sdf_triangle(st, c, ac, bc) >= 0.0) {
       a = ac;
       b = bc;
       continue;

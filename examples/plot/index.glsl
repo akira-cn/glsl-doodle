@@ -49,7 +49,7 @@ void main() {
   vec2 idx = grid_index(st, grid);
   
   // st = grid_xy(st, grid);
-  st = lerp(vec2(-10, -10), vec2(10, 10), st);
+  st = mix(vec2(-10, -10), vec2(10, 10), st);
 
   float stp = 0.1;
   float thick = 0.8;
