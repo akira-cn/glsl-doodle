@@ -13,8 +13,7 @@ uniform vec2 dd_randseed;
 uniform vec2 dd_randseed0;
 uniform int dd_rendercount;
 
-void main()
-{
+void main() {
     vec2 st = gl_FragCoord.xy / dd_resolution.xy;
     vec3 color = vec3(0.0);
     

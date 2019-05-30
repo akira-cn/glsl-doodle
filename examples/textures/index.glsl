@@ -17,8 +17,7 @@ varying highp vec2 vTextureCoord;
 uniform sampler2D dd_sampler0;
 uniform sampler2D dd_sampler1;
 
-void main()
-{
+void main() {
   vec2 st = gl_FragCoord.xy / dd_resolution;
   vec2 grid = vec2(10, 10);
   vec2 idx = grid_index(st, grid);

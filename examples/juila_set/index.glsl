@@ -11,14 +11,10 @@ uniform float dd_time;
 uniform vec2 dd_resolution;
 uniform vec2 dd_randseed;
 uniform vec2 dd_randseed0;
+uniform int dd_rendercount;
 
 void main() {
-	vec2 st = gl_FragCoord.xy / dd_resolution.xy;
-
-  st = polar(st, vec2(0.5));
-
-	float d = sdf_ellipse(st, vec2(0.5), 0.5, 0.3);
-	vec3 color = vec3(fill(d, 0.02));
-
-	gl_FragColor = vec4(color, 1.0);
+  vec2 st = gl_FragCoord.xy / dd_resolution;
+  float d = juila_set(st, vec2(0.5), 2.5, vec2(-0.8, 0.156), 0.01);
+  gl_FragColor = vec4(vec3(d), 1.0);
 }

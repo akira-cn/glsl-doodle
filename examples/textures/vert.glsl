@@ -13,8 +13,7 @@ varying highp vec2 vTextureCoord;
 uniform float dd_time;
 uniform vec2 dd_randseed;
 
-void main()
-{
+void main() {
   vec2 idx = grid_index(vec2(a_position.x, a_position.y), vec2(10.0, 10.0));
 
   gl_PointSize = 1.0;

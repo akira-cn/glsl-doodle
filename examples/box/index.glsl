@@ -24,7 +24,7 @@ void main()
 { 
   vec2 pos = vec2(100.0 + 100.0 * sin(dd_time));
 
-  box2 box = create_box(pos, vec2(300.0, 300.0));
+  box2 box = create_box(pos, 300.0, 300.0);
   box = rotate(box, center(box), PI / 4.0);
   // box = scale(box, pos, vec2(1.5));
   // box = skew(box, pos, vec2(0.25, 0.0));

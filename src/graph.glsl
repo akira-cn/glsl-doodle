@@ -33,9 +33,13 @@
   返回值：
     UDF  距离场
 */
+#ifndef PLOT
 #define PLOT(f, st, step) sdf_plot(st, vec2(st.x - step, f(st.x - step)), vec2(st.x, f(st.x)), vec2(st.x + step, f(st.x + step)))
+#endif
 
+#ifndef SPRITE
 #define SPRITE(quad, f) if(quad.x >= 0.0 && quad.x <= 1.0) f(quad);
+#endif
 
 /**
   点到直线的距离
@@ -299,6 +303,10 @@ UDF fill(in SDF d, in float smth) {
   return fill(d, 0.0, 1.0, smth, 0.0);
 }
 
+UDF fill(in SDF d) {
+  return fill(d, 0.0, 1.0, 0.0, 0.0);
+}
+
 /**
   box2 由四个点构成矩形或平行四边形
  */
@@ -316,18 +324,28 @@ vec2 center(in box2 box) {
   return (box.a + box.c) * 0.5;
 }
 
+vec2 center(in vec2 v) {
+  return v * 0.5;
+}
+
+vec2 center(in vec2 v1, in vec2 v2) {
+  return (v1 + v2) * 0.5;
+}
+
 /**
   创建 box2
 
   参数：
     vec2 point  参考点
-    vec2 size   宽高
+    float w 宽
+    float h 高
     vec2 anchro 锚
 
   返回值：
     box2
  */
-box2 create_box(in vec2 point, in vec2 size, in vec2 anchor) {
+box2 create_box(in vec2 point, float w, float h, in vec2 anchor) {
+  vec2 size = vec2(w, h);
   vec2 a = point + size * (vec2(0.0) - anchor);
   vec2 b = point + size * (vec2(1.0, 0.0) - anchor);
   vec2 c = point + size * (vec2(1.0) - anchor);
@@ -336,16 +354,24 @@ box2 create_box(in vec2 point, in vec2 size, in vec2 anchor) {
   return box2(a, b, c, d);  
 }
 
-box2 create_box(in vec2 point, in vec2 size) {
-  return create_box(point, size, vec2(0.0));
+box2 create_box(in vec2 point, float w, float h) {
+  return create_box(point, w, h, vec2(0.0));
 }
 
-box2 create_box(in vec2 size) {
-  return create_box(vec2(0.0), size, vec2(0.0));
+box2 create_box(in vec2 point, float wh) {
+  return create_box(point, wh, wh, vec2(0.0));
+}
+
+box2 create_box(float w, float h) {
+  return create_box(vec2(0.0), w, h, vec2(0.0));
+}
+
+box2 create_box(float wh) {
+  return create_box(vec2(0.0), wh, wh, vec2(0.0));
 }
 
 box2 create_box() {
-  return create_box(vec2(0.0), vec2(1.0), vec2(0.0));
+  return create_box(vec2(0.0), 1.0, 1.0, vec2(0.0));
 }
 
 /**
@@ -587,11 +613,11 @@ UDF shape_bean(in vec2 st) {
 }
 
 UDF shape_apple(in vec2 st, in vec2 center) {
-  return shape_clover(vec2(st.y, st.x), center, 1.3);
+  return shape_clover(vec2(st.y - 0.2, st.x), center, 1.3);
 }
 
 UDF shape_apple(in vec2 st) {
-  return shape_clover(vec2(st.y, st.x), vec2(0.5), 1.3);
+  return shape_clover(vec2(st.y - 0.2, st.x), vec2(0.5), 1.3);
 }
 
 UDF shape_clover3(in vec2 st, in vec2 center) {
@@ -804,6 +830,24 @@ UDF shape_octagon(in vec2 st, in vec2 center) {
 
 UDF shape_octagon(in vec2 st) {
   return shape_regular_polygon(st, vec2(0.5), 8);
+}
+
+/**
+  分形
+ */
+UDF juila_set(in vec2 st, in vec2 center, in float dist, in vec2 c, in float scale) {
+  const int max_iterations = 255;
+  vec2 uv = 2.5 * (st - center);
+  int count = max_iterations;
+
+  for(int i = 0; i < max_iterations; i++) {
+    uv = c + vec2(uv.x * uv.x - uv.y * uv.y, uv.x * uv.y * 2.0);
+    if(dot(uv, uv) > 4.0) {
+      count = i;
+      break;
+    }
+  }
+  return float(count) * scale;
 }
 
 #endif

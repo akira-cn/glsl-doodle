@@ -13,8 +13,7 @@ uniform vec2 dd_resolution;
 uniform vec2 dd_randseed;
 uniform vec2 dd_randseed0;
 
-void main()
-{
+void main() {
   vec2 st = gl_FragCoord.xy / dd_resolution;
   vec2 grid = vec2(10, 10);
   vec2 idx = grid_index(st, grid);

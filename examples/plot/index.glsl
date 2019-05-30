@@ -40,8 +40,7 @@ float f5(in float x) {
   return log(x);
 }
 
-void main()
-{
+void main() {
   // gl_FragColor = vec4(abs(sin(dd_time)),0.0,0.0,1.0);
   // vec2 st = gl_FragCoord.xy / dd_resolution;
 	// gl_FragColor = vec4(st, 0.0, 1.0);

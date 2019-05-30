@@ -6,7 +6,6 @@ precision mediump float;
 #pragma include <graph>
 #pragma include <color>
 #pragma include <pattern>
-#pragma include "./common.glsl"
 
 uniform float dd_time;
 uniform vec2 dd_resolution;

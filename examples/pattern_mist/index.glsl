@@ -13,8 +13,7 @@ uniform vec2 dd_randseed;
 uniform vec2 dd_randseed0;
 uniform int dd_rendercount;
 
-void main()
-{
+void main() {
   vec2 st = gl_FragCoord.xy / dd_resolution.xy;
   gl_FragColor = vec4(vec3(mist(st + dd_randseed0)), 1.0);
 }
