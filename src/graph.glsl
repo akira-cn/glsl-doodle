@@ -104,20 +104,6 @@ SDF sdf_plot(in vec2 p, in vec2 v1, in vec2 v2, in vec2 v3) {
   return min(d1, d2);
 }
 
-/**
-  将距离转换为单位距离场：UDF
-
-  参数：
-    float d 距离
-    float w 范围
-    float smth 边缘模糊率
- */
-UDF distance_to_udf(in float d, in float w, in float smth) {
-  float th = 0.5 * w;
-  smth = smth * w;
-  return smoothstep(-th, smth - th, d) - smoothstep(th - smth, th, d);
-}
-
 UDF stroke(in SDF d, in float d0, in float w, in float smth) {
   float th = 0.5 * w;
   smth = smth * w;
