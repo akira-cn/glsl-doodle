@@ -38,6 +38,12 @@ bool grid_even(in vec2 idx, in vec2 grid) {
 #ifndef OCTAVES
 #define OCTAVES 6
 #endif
+
+/* --- effects --- */
+
+/**
+  云雾
+ */
 float mist(in vec2 st) {
   //Initial values
   float value = 0.0;
@@ -51,6 +57,24 @@ float mist(in vec2 st) {
     amplitude *= 0.5;
   }
   return value;
+}
+
+/**
+  分形
+ */
+UDF juila_set(in vec2 st, in vec2 center, in float dist, in vec2 c, in float scale) {
+  const int max_iterations = 255;
+  vec2 uv = 2.5 * (st - center);
+  int count = max_iterations;
+
+  for(int i = 0; i < max_iterations; i++) {
+    uv = c + vec2(uv.x * uv.x - uv.y * uv.y, uv.x * uv.y * 2.0);
+    if(dot(uv, uv) > 4.0) {
+      count = i;
+      break;
+    }
+  }
+  return float(count) * scale;
 }
 
 #endif

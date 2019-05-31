@@ -5,12 +5,16 @@ import {setupWebGL, createProgram, pointsToBuffer, loadImage} from './helpers';
 
 import DEFAULT_VERT from './default_vert.glsl';
 import DEFAULT_FRAG from './default_frag.glsl';
-import stdlib from './stdlib.glsl';
-import graph from './graph.glsl';
-import color from './color.glsl';
-import pattern from './pattern.glsl';
+import stdlib from './lib/stdlib.glsl';
+import shapes from './lib/shapes.glsl';
+import shaper from './lib/shaper.glsl';
+import box from './lib/box.glsl';
+import transform from './lib/transform.glsl';
+import graph from './lib/graph.glsl';
+import color from './lib/color.glsl';
+import pattern from './lib/pattern.glsl';
 
-const GLSL_LIBS = {stdlib, graph, color, pattern};
+const GLSL_LIBS = {stdlib, box, transform, graph, color, pattern, shapes, shaper};
 
 export default class Doodle {
   static uniformTypes = {
@@ -144,31 +148,42 @@ export default class Doodle {
       async function _loadFile(url) {
         const res = await fetch(url);
         let content = await res.text();
-        const includes = [];
 
-        const matched = content.match(/^#pragma include .*/mg);
-        if(matched) {
-          for(let i = 0; i < matched.length; i++) {
-            const m = matched[i];
-            const _matched = m.match(/(?:<|")(.*)(?:>|")/);
-            if(_matched) {
-              const type = _matched[0].indexOf('<') === 0 ? 'lib' : 'link';
-              const name = _matched[1];
-              if(!loaded[name]) {
-                loaded[name] = true;
-                if(type === 'lib') {
-                  includes.push(GLSL_LIBS[name]);
-                } else if(type === 'link') {
+        async function parse(content) {
+          const includes = [];
+
+          const matched = content.match(/^#pragma include .*/mg);
+          if(matched) {
+            // console.log(matched, url);
+            for(let i = 0; i < matched.length; i++) {
+              const m = matched[i];
+              const _matched = m.match(/(?:<|")(.*)(?:>|")/);
+              if(_matched) {
+                const type = _matched[0].indexOf('<') === 0 ? 'lib' : 'link';
+                const name = _matched[1];
+                if(!loaded[name]) {
+                  loaded[name] = true;
                   // TODO: 这里可以优化成异步加载
-                  const loadedText = await _loadFile(name); // eslint-disable-line no-await-in-loop
-                  includes.push(loadedText);
+                  if(type === 'lib') {
+                    const c = await parse(GLSL_LIBS[name]); // eslint-disable-line no-await-in-loop
+                    includes.push(c);
+                  } else if(type === 'link') {
+                    const loadedText = await _loadFile(name); // eslint-disable-line no-await-in-loop
+                    includes.push(loadedText);
+                  }
+                } else {
+                  includes.push(`/* included ${name} */`);
                 }
               }
             }
+
+            includes.forEach((inc) => {
+              content = content.replace(/^#pragma include .*/m, inc);
+            });
           }
-          content = content.replace(/^#pragma include .*/m, includes.join('\n'));
-          content = content.replace(/^#pragma include .*/mg, '');
+          return content;
         }
+        content = await parse(content);
         return content;
       }
 

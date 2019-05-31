@@ -40,6 +40,14 @@ float angle(in vec2 v) {
   return angle(v, vec2(1.0, 0.0));
 }
 
+vec2 center(in vec2 v) {
+  return v * 0.5;
+}
+
+vec2 center(in vec2 v1, in vec2 v2) {
+  return (v1 + v2) * 0.5;
+}
+
 float random (vec2 st) {
   return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
 }
@@ -68,6 +76,21 @@ float noise(vec2 st) {
                      random( i + vec2(1.0,0.0) ), u.x),
                 mix( random( i + vec2(0.0,1.0) ),
                      random( i + vec2(1.0,1.0) ), u.x), u.y);
+}
+
+/**
+  将直角坐标转为极坐标
+ */
+vec2 polar(in vec2 st, in vec2 c) {
+  vec2 p = c - st;
+  float r = length(p) * 2.0;
+  float a = atan(p.y, p.x);
+
+  return vec2(r, a);  
+}
+
+vec2 polar(in vec2 st) {
+  return polar(st, vec2(0.5));
 }
 
 #endif
