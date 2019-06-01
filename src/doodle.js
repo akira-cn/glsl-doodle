@@ -1,6 +1,3 @@
-import {toPath} from 'svg-points';
-import svgMesh3d from 'svg-mesh-3d';
-
 import {setupWebGL, createProgram, pointsToBuffer, loadImage} from './helpers';
 
 import DEFAULT_VERT from './default_vert.glsl';
@@ -84,26 +81,27 @@ export default class Doodle {
     if(this.textures) this.bindTextures(this.textures);
   }
 
-  clipPath(path) {
-    if(typeof path === 'string') {
-      path = {
-        type: 'path',
-        d: path,
-      };
-    }
-    const normalized = path.normalized;
-    path = toPath(path);
-    let {positions: vertices, cells} = svgMesh3d(path, {
-      normalize: false,
-    });
-    const gl = this.gl;
-    if(!normalized) {
-      vertices = vertices.map(([x, y]) => {
-        return [x / gl.canvas.width, y / gl.canvas.height, 0.0];
-      });
-    }
-    this.clip({vertices, cells});
-  }
+  // clipPath(path) {
+  //   // svg-mesh-3d + svg-points
+  //   if(typeof path === 'string') {
+  //     path = {
+  //       type: 'path',
+  //       d: path,
+  //     };
+  //   }
+  //   const normalized = path.normalized;
+  //   path = toPath(path);
+  //   let {positions: vertices, cells} = svgMesh3d(path, {
+  //     normalize: false,
+  //   });
+  //   const gl = this.gl;
+  //   if(!normalized) {
+  //     vertices = vertices.map(([x, y]) => {
+  //       return [x / gl.canvas.width, y / gl.canvas.height, 0.0];
+  //     });
+  //   }
+  //   this.clip({vertices, cells});
+  // }
 
   setProgram(vertexShader, fragmentShader) {
     this.clearTextures();

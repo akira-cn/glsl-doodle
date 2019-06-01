@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --env.server=examples --watch-poll",
+    "build": "webpack --env.production=true",
     "lint": "eslint 'src/**/*.js' --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -29,8 +30,6 @@
     "webpack-dev-server": "^3.4.1"
   },
   "dependencies": {
-    "@babel/runtime": "^7.4.5",
-    "svg-mesh-3d": "^1.1.0",
-    "svg-points": "^6.0.1"
+    "@babel/runtime": "^7.4.5"
   }
 }
