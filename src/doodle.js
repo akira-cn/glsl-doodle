@@ -146,28 +146,31 @@ export default class Doodle {
     return program;
   }
 
-  async loadShader(fragmentShader) {
+  async compileShader(fragmentShader) {
     const program = await this.load(fragmentShader, null, true);
     return program;
   }
 
-  async loadShaders(fragmentShader, vertexShader) {
+  async compileShaders(fragmentShader, vertexShader) {
     const program = await this.load(fragmentShader, vertexShader, true);
     return program;
   }
 
   async load(frag, vert = null, isContent = false) {
     async function _load(glsl) {
-      const loaded = {
-        [frag]: true,
-      };
+      const loaded = {};
+      if(!isContent) {
+        loaded[glsl] = true;
+      }
 
       async function _loadFile(url) {
         let content = url;
+
         if(!isContent) {
           const res = await fetch(url);
           content = await res.text();
         }
+        content = content.replace(/^\s*/mg, '');
 
         async function parse(content) {
           const includes = [];

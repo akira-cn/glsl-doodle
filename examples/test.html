@@ -13,30 +13,24 @@
     (async function () {
       const doodle = new Doodle(glDoodle);
 
-      // console.log(doodle);
-      // await doodle.load('./index.glsl');
+      await doodle.compileShader(`
+      #ifdef GL_ES
+      precision mediump float;
+      #endif
 
-      // await doodle.loadTextures(
-      //   'https://p4.ssl.qhimg.com/t012170360e1552ce17.png',
-      //   'https://p3.ssl.qhimg.com/t01a01fe1b96d05edcd.png'
-      // );
+      #pragma include <graph>
 
-      // await doodle.load('./graph-line.glsl');
+      uniform vec2 dd_resolution;
 
-      // doodle.declareUniforms({
-      //   abc: '2fv',
-      // });
+      void main() {
+        vec2 st = gl_FragCoord.xy / dd_resolution;
+        float d = sdf_circle(st, vec2(0.5), 0.2);
+        d = fill(d, 0.5);
+        gl_FragColor = d * vec4(1.0, 0.0, 1.0, 1.0);
+      }
+      `);
 
-      // doodle.clipPath({
-      //   type: 'circle',
-      //   cx: 100,
-      //   cy: 100,
-      //   r: 50,
-      // });
-
-      doodle.render({
-        autoUpdate: false,
-      });
+      doodle.render();
 
       window.doodle = doodle;
     }());
