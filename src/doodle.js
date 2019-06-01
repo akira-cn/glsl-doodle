@@ -103,7 +103,7 @@ export default class Doodle {
   //   this.clip({vertices, cells});
   // }
 
-  setProgram(vertexShader, fragmentShader) {
+  setProgram(vertexShader = DEFAULT_VERT, fragmentShader = DEFAULT_FRAG) {
     this.clearTextures();
     this.deleteProgram();
 
@@ -112,10 +112,6 @@ export default class Doodle {
     const program = createProgram(gl, vertexShader, fragmentShader);
     gl.useProgram(program);
     this.program = program;
-
-    const vPosition = gl.getAttribLocation(this.program, 'a_position');
-    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vPosition);
 
     this.clip({vertices: this.vertices, cells: this.cells});
 
@@ -142,6 +138,10 @@ export default class Doodle {
       });
       this.uniforms[sampler] = i;
     }
+
+    const vPosition = gl.getAttribLocation(program, 'a_position');
+    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vPosition);
 
     return program;
   }
