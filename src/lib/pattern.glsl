@@ -62,7 +62,7 @@ float mist(in vec2 st) {
 /**
   分形
  */
-UDF juila_set(in vec2 st, in vec2 center, in float dist, in vec2 c, in float scale) {
+float juila_set(in vec2 st, in vec2 center, in float dist, in vec2 c, in float scale) {
   const int max_iterations = 255;
   vec2 uv = 2.5 * (st - center);
   int count = max_iterations;

@@ -11,7 +11,9 @@
   <canvas id="glDoodle" width="512" height="512"></canvas>
   <script>
     (async function () {
-      const doodle = new Doodle(glDoodle);
+      const doodle = new Doodle(glDoodle, {
+        preserveDrawingBuffer: true,
+      });
 
       // console.log(doodle);
       await doodle.load('./index.glsl', './vert.glsl');
@@ -36,6 +38,10 @@
 
       doodle.render({
         autoUpdate: true,
+        feedback: (context) => {
+          // context.fillStyle = 'red';
+          // context.fillRect(0, 0, 200, 200);
+        },
       });
 
       window.doodle = doodle;

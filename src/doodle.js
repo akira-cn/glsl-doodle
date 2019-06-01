@@ -42,7 +42,7 @@ export default class Doodle {
   constructor(canvas, opts = {}) {
     this.options = opts;
 
-    const gl = setupWebGL(canvas);
+    const gl = setupWebGL(canvas, opts);
     this.gl = gl;
 
     gl.viewport(0, 0, canvas.width, canvas.height);
@@ -81,6 +81,7 @@ export default class Doodle {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, pointsToBuffer(cells, Uint8Array), gl.STATIC_DRAW);
     this.vertices = vertices;
     this.cells = cells;
+    if(this.textures) this.bindTextures(this.textures);
   }
 
   clipPath(path) {
@@ -135,6 +136,14 @@ export default class Doodle {
     this.uniforms.dd_randseed = this.uniforms.dd_randseed0;
     this.uniforms.dd_rendercount = 0;
     this.uniforms.dd_resolution = [gl.canvas.width, gl.canvas.height];
+
+    for(let i = 0; i < 32; i++) {
+      const sampler = `dd_sampler${i}`;
+      this.declareUniforms({
+        [sampler]: '1i',
+      });
+      this.uniforms[sampler] = i;
+    }
 
     return program;
   }
@@ -208,14 +217,9 @@ export default class Doodle {
     }
   }
 
-  async loadTextures(...sources) {
-    const gl = this.gl;
-
-    this.clearTextures();
-
-    const promises = sources.map(async (src, i) => {
-      const source = await loadImage(src);
-
+  bindTextures(sources) {
+    return sources.map((source, i) => {
+      const gl = this.gl;
       gl.activeTexture(gl.TEXTURE0 + i);
       const texture = gl.createTexture();
       gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -228,20 +232,12 @@ export default class Doodle {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       // Prevents t-coordinate wrapping (repeating).
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-      // bind texture and set the sampler
-      // gl.bindTexture(gl.TEXTURE_2D, texture);
-
-      const sampler = `dd_sampler${i}`;
-      this.declareUniforms({
-        [sampler]: '1i',
-      });
-      this.uniforms[sampler] = i;
-
       return texture;
     });
+  }
 
-    const textures = await Promise.all(promises);
+  setTextureCoordinate() {
+    const gl = this.gl;
 
     const texVertexData = this.vertices.map(v => [0.5 * (v[0] + 1), 0.5 * (v[1] + 1)]);
 
@@ -254,7 +250,17 @@ export default class Doodle {
     const vertexTexCoordAttribute = gl.getAttribLocation(this.program, 'a_vertexTextureCoord');
     gl.enableVertexAttribArray(vertexTexCoordAttribute);
     gl.vertexAttribPointer(vertexTexCoordAttribute, 2, gl.FLOAT, false, 0, 0);
+  }
 
+  async loadTextures(...sources) {
+    this.clearTextures();
+
+    const promises = sources.map(loadImage);
+
+    sources = await Promise.all(promises);
+    const textures = this.bindTextures(sources);
+
+    this.setTextureCoordinate();
     this.textures = textures;
 
     return textures;
@@ -304,15 +310,40 @@ export default class Doodle {
   }
 
   render(opts = {}) {
+    const gl = this.gl;
+    if(opts.feedback) {
+      if(!this.options.preserveDrawingBuffer) {
+        throw new Error(`Must set preserveDrawingBuffer to true to enable feedback mode.
+Try new Doodle({preserveDrawingBuffer: true})`);
+      }
+      if(!this.feedbackContext) {
+        if(this.textures) {
+          throw new Error('Cannot enable feedback while use textures');
+        }
+        const canvas = this.gl.canvas.cloneNode();
+        this.feedbackContext = canvas.getContext('2d');
+        if(typeof opts.feedback === 'function') {
+          opts.feedback(this.feedbackContext);
+        }
+        this.bindTextures([canvas]);
+        this.setTextureCoordinate();
+        this.textures = [canvas];
+      } else {
+        const context = this.feedbackContext;
+        context.clearRect(0, 0, gl.canvas.width, gl.canvas.height);
+        context.drawImage(gl.canvas, 0, 0);
+        this.bindTextures([this.feedbackContext.canvas]);
+      }
+    }
     if(!this.startTime) this.startTime = Date.now();
 
     this.uniforms.dd_time = (Date.now() - this.startTime) / 1000;
     this.uniforms.dd_randseed = [Math.random(), Math.random()];
-    this.uniforms.dd_rendercount++;
 
-    const gl = this.gl;
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawElements(gl.TRIANGLES, this.cells.length * 3, gl.UNSIGNED_BYTE, 0);
+
+    this.uniforms.dd_rendercount++;
 
     if(opts.autoUpdate) {
       window.requestAnimationFrame(this.render.bind(this, opts));
