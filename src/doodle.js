@@ -60,7 +60,7 @@ export default class Doodle {
       [3, 1, 2],
     ];
 
-    this.program = this.setProgram(DEFAULT_VERT, DEFAULT_FRAG);
+    this.program = this.setProgram(DEFAULT_FRAG, DEFAULT_VERT);
   }
 
   deleteProgram() {
@@ -103,7 +103,7 @@ export default class Doodle {
   //   this.clip({vertices, cells});
   // }
 
-  setProgram(vertexShader = DEFAULT_VERT, fragmentShader = DEFAULT_FRAG) {
+  setProgram(fragmentShader = DEFAULT_FRAG, vertexShader = DEFAULT_VERT) {
     this.clearTextures();
     this.deleteProgram();
 
@@ -146,15 +146,28 @@ export default class Doodle {
     return program;
   }
 
-  async load(frag, vert = null) {
+  async loadShader(fragmentShader) {
+    const program = await this.load(fragmentShader, null, true);
+    return program;
+  }
+
+  async loadShaders(fragmentShader, vertexShader) {
+    const program = await this.load(fragmentShader, vertexShader, true);
+    return program;
+  }
+
+  async load(frag, vert = null, isContent = false) {
     async function _load(glsl) {
       const loaded = {
         [frag]: true,
       };
 
       async function _loadFile(url) {
-        const res = await fetch(url);
-        let content = await res.text();
+        let content = url;
+        if(!isContent) {
+          const res = await fetch(url);
+          content = await res.text();
+        }
 
         async function parse(content) {
           const includes = [];
@@ -200,7 +213,7 @@ export default class Doodle {
 
     const fragmentShader = await _load(frag);
     const vertexShader = vert ? await _load(vert) : DEFAULT_VERT;
-    const program = this.setProgram(vertexShader, fragmentShader);
+    const program = this.setProgram(fragmentShader, vertexShader);
 
     return program;
   }
