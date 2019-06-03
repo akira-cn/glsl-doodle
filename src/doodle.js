@@ -2,6 +2,7 @@ import {setupWebGL, createProgram, pointsToBuffer, loadImage} from './helpers';
 
 import DEFAULT_VERT from './default_vert.glsl';
 import DEFAULT_FRAG from './default_frag.glsl';
+import DEFAULT_FEEDBACK_FRAG from './default_feeback_vert.glsl';
 import stdlib from './lib/stdlib.glsl';
 import shapes from './lib/shapes.glsl';
 import shaper from './lib/shaper.glsl';
@@ -39,6 +40,12 @@ export default class Doodle {
   constructor(canvas, opts = {}) {
     this.options = opts;
 
+    if(opts.feedback) {
+      opts.preserveDrawingBuffer = true;
+      this.renderFeedBack = opts.feedback;
+      delete opts.feedback;
+    }
+
     const gl = setupWebGL(canvas, opts);
     this.gl = gl;
 
@@ -60,7 +67,18 @@ export default class Doodle {
       [3, 1, 2],
     ];
 
-    this.program = this.setProgram(DEFAULT_FRAG, DEFAULT_VERT);
+    if(this.renderFeedBack) {
+      const feedbackCanvas = canvas.cloneNode();
+      this.feedbackContext = feedbackCanvas.getContext('2d');
+      if(typeof this.renderFeedBack === 'function') {
+        this.renderFeedBack(this.feedbackContext);
+      }
+      this.setProgram(DEFAULT_FRAG, DEFAULT_FEEDBACK_FRAG);
+      this.textures = this.bindTextures([feedbackCanvas]);
+      this.setTextureCoordinate();
+    } else {
+      this.setProgram(DEFAULT_FRAG, DEFAULT_VERT);
+    }
   }
 
   deleteProgram() {
@@ -103,9 +121,12 @@ export default class Doodle {
   //   this.clip({vertices, cells});
   // }
 
-  setProgram(fragmentShader = DEFAULT_FRAG, vertexShader = DEFAULT_VERT) {
+  setProgram(fragmentShader = this.fragmentShader, vertexShader = this.vertexShader) {
     this.clearTextures();
     this.deleteProgram();
+
+    this.fragmentShader = fragmentShader;
+    this.vertexShader = vertexShader;
 
     const gl = this.gl;
 
@@ -142,6 +163,8 @@ export default class Doodle {
     const vPosition = gl.getAttribLocation(program, 'a_position');
     gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
+
+    this.program = program;
 
     return program;
   }
@@ -215,7 +238,7 @@ export default class Doodle {
     }
 
     const fragmentShader = await _load(frag);
-    const vertexShader = vert ? await _load(vert) : DEFAULT_VERT;
+    const vertexShader = vert ? await _load(vert) : this.vertexShader;
     const program = this.setProgram(fragmentShader, vertexShader);
 
     return program;
@@ -325,29 +348,11 @@ export default class Doodle {
 
   render(opts = {}) {
     const gl = this.gl;
-    if(opts.feedback) {
-      if(!this.options.preserveDrawingBuffer) {
-        throw new Error(`Must set preserveDrawingBuffer to true to enable feedback mode.
-Try new Doodle({preserveDrawingBuffer: true})`);
-      }
-      if(!this.feedbackContext) {
-        if(this.textures) {
-          throw new Error('Cannot enable feedback while use textures');
-        }
-        const canvas = this.gl.canvas.cloneNode();
-        this.feedbackContext = canvas.getContext('2d');
-        if(typeof opts.feedback === 'function') {
-          opts.feedback(this.feedbackContext);
-        }
-        this.bindTextures([canvas]);
-        this.setTextureCoordinate();
-        this.textures = [canvas];
-      } else {
-        const context = this.feedbackContext;
-        context.clearRect(0, 0, gl.canvas.width, gl.canvas.height);
-        context.drawImage(gl.canvas, 0, 0);
-        this.bindTextures([this.feedbackContext.canvas]);
-      }
+    if(this.renderFeedBack) {
+      const context = this.feedbackContext;
+      context.clearRect(0, 0, gl.canvas.width, gl.canvas.height);
+      context.drawImage(gl.canvas, 0, 0);
+      this.bindTextures([this.feedbackContext.canvas]);
     }
     if(!this.startTime) this.startTime = Date.now();
 

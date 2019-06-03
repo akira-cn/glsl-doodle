@@ -12,7 +12,10 @@
   <script>
     (async function () {
       const doodle = new Doodle(glDoodle, {
-        preserveDrawingBuffer: true,
+        feedback: (context) => {
+          // context.fillStyle = 'red';
+          // context.fillRect(0, 0, 200, 200);
+        },
       });
 
       // console.log(doodle);
@@ -38,10 +41,6 @@
 
       doodle.render({
         autoUpdate: true,
-        feedback: (context) => {
-          // context.fillStyle = 'red';
-          // context.fillRect(0, 0, 200, 200);
-        },
       });
 
       window.doodle = doodle;
