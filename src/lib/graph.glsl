@@ -279,9 +279,9 @@ SDF sdf_rhombus(in vec2 st, in vec2 cr, float w, float h) {
 }
 
 /**
-  正多边形
+  正多边形(含内摆线)
  */
-SDF regular_polygon(in vec2 st, in vec2 center, in float r, float rotation, const int edges) {
+SDF regular_polygon(in vec2 st, in vec2 center, in float r, float rotation, const int edges, bool hypocycloid) {
   vec2 p = st - center;
   vec2 v0 = vec2(0, r); // 第一个顶点
   v0 = rotate(v0, -rotation);
@@ -294,14 +294,34 @@ SDF regular_polygon(in vec2 st, in vec2 center, in float r, float rotation, cons
   vec2 v1 = rotate(v0, a * ang); // 左顶点
   vec2 v2 = rotate(v0, a * (ang + 1.0)); // 右顶点
 
-  float l = r * cos(0.5 * a);
+  float c_a = cos(0.5 * a);
+
+  float l = r * c_a;
 
   float d = sdf_line(p, v1, v2);
-  return d / l;   
+  
+  if(hypocycloid && d >= 0.0) {
+    vec2 c = (v1 + v2) / 2.0;
+    float r2 = r * tan(0.5 * a);
+    vec2 ce = c / (c_a * c_a); // 外部圆心
+
+    d = (distance(p, ce) - r2) / (length(ce) - r2);
+    return d;
+  }
+  
+  return d / l; 
+}
+
+SDF regular_polygon(in vec2 st, in vec2 center, in float r, float rotation, const int edges) {
+  return regular_polygon(st, center, r, rotation, edges, false);
+}
+
+SDF regular_polygon(in vec2 st, in vec2 center, in float r, const int edges, bool hypocycloid) {
+  return regular_polygon(st, center, r, 0.0, edges, true);
 }
 
 SDF regular_polygon(in vec2 st, in vec2 center, in float r, const int edges) {
-  return regular_polygon(st, center, r, 0.0, edges);
+  return regular_polygon(st, center, r, 0.0, edges, false);
 }
 
 UDF fill(in SDF d, in float start, in float end, in float smth_start, float smth_end) {

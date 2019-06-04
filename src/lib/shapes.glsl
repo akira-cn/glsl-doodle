@@ -171,11 +171,6 @@ UDF shape_bud12(in vec2 st) {
   return shape_bud(st, vec2(0.5), 12.0);
 }
 
-UDF shape_regular_polygon(in vec2 st, in vec2 center, const int edges) {
-  float d = regular_polygon(st, center, 0.45, edges);
-  return fill(d, 0.01);
-}
-
 // TODO: 处理锯齿
 UDF shape_star(in vec2 st, in vec2 center) {
   float r = 0.45;
@@ -204,6 +199,11 @@ UDF shape_star(in vec2 st, in vec2 center) {
   }
 
   return d;
+}
+
+UDF shape_regular_polygon(in vec2 st, in vec2 center, const int edges) {
+  float d = regular_polygon(st, center, 0.45, edges);
+  return fill(d, 0.01);
 }
 
 UDF shape_star(in vec2 st) {
@@ -256,6 +256,15 @@ UDF shape_octagon(in vec2 st, in vec2 center) {
 
 UDF shape_octagon(in vec2 st) {
   return shape_regular_polygon(st, vec2(0.5), 8);
+}
+
+UDF shape_hypocycloid(in vec2 st, in vec2 center, const int edges) {
+  float d = regular_polygon(st, center, 0.45, edges, true);
+  return fill(d, 0.01);
+}
+
+UDF shape_hypocycloid(in vec2 st, const int edges) {
+  return shape_hypocycloid(st, vec2(0.5), edges);
 }
 
 #endif
