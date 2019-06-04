@@ -11,7 +11,6 @@ uniform float dd_time;
 uniform vec2 dd_resolution;
 uniform vec2 dd_randseed;
 uniform vec2 dd_randseed0;
-uniform int dd_rendercount;
 
 // https://thebookofshaders.com/12/
 void main() {

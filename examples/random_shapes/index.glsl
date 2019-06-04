@@ -11,7 +11,6 @@ uniform float dd_time;
 uniform vec2 dd_resolution;
 uniform vec2 dd_randseed;
 uniform vec2 dd_randseed0;
-uniform int dd_rendercount;
 
 UDF random_shap(in vec2 st, in vec2 seed) {
     float num = floor(random(seed) * 8.0);

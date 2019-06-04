@@ -11,7 +11,6 @@ uniform float dd_time;
 uniform vec2 dd_resolution;
 uniform vec2 dd_randseed;
 uniform vec2 dd_randseed0;
-uniform int dd_rendercount;
 
 SDF gasket(in vec2 st, in vec2 a, in vec2 b, in vec2 c) {
   const int count = 5;

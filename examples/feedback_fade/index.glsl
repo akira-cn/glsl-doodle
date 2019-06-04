@@ -10,7 +10,7 @@ precision mediump float;
 uniform float dd_time;
 uniform vec2 dd_randseed0;
 uniform vec2 dd_resolution;
-uniform int dd_rendercount;
+uniform int dd_frameIndex;
 
 uniform sampler2D dd_sampler0;
 varying highp vec2 vTextureCoord;
@@ -24,7 +24,7 @@ void main() {
   // d = fill(d, 1.0);
 
   // gl_FragColor = vec4(vec3(d), 1.0);
-  if(dd_rendercount == 0) {
+  if(dd_frameIndex == 0) {
     float d = sdf_circle(st, vec2(0.5), 0.2);
     d = fill(d, 0.5);
     gl_FragColor = vec4(d * vec3(1.0, 1.0, 1.0), 1.0);

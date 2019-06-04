@@ -11,8 +11,6 @@ uniform float dd_time;
 uniform vec2 dd_randseed0;
 uniform vec2 dd_resolution;
 
-uniform int dd_rendercount;
-
 uniform sampler2D dd_sampler0;
 
 varying vec2 vTextureCoord;

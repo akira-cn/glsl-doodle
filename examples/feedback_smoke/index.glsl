@@ -11,9 +11,9 @@ uniform float dd_time;
 uniform vec2 dd_randseed0;
 uniform vec2 dd_resolution;
 
-uniform int dd_rendercount;
+uniform int dd_frameIndex;
 
-uniform sampler2D dd_sampler0;
+uniform sampler2D dd_feedbackSampler;
 
 varying vec2 vTextureCoord;
 
@@ -27,18 +27,18 @@ void main() {
   box = rotate(box, vec2(0.5 + 0.05 * sin(dd_time)), 0.02 * dd_time);
   st = box_quad(st, box);
 
-  if(dd_rendercount == 0) {
+  if(dd_frameIndex == 0) {
     float d = sdf_circle(st, vec2(0.4), 0.02);
     d = fill(d);
     gl_FragColor = vec4(d * vec3(1.0, 1.0, 1.0), 1.0);
   } 
-  if(dd_rendercount > 0) {
+  if(dd_frameIndex > 0) {
     // vec2 st = rotate(st, vec2(0.6), 0.02 * dd_time);
-    vec4 left = texture2D(dd_sampler0, st + vec2(-xPixel, 0.0));
-    vec4 right = texture2D(dd_sampler0, st + vec2(xPixel, 0.0));
-    vec4 up = texture2D(dd_sampler0, st + vec2(0.0, -yPixel));
-    vec4 down = texture2D(dd_sampler0, st + vec2(0.0, yPixel));
-    gl_FragColor = texture2D(dd_sampler0, st);
+    vec4 left = texture2D(dd_feedbackSampler, st + vec2(-xPixel, 0.0));
+    vec4 right = texture2D(dd_feedbackSampler, st + vec2(xPixel, 0.0));
+    vec4 up = texture2D(dd_feedbackSampler, st + vec2(0.0, -yPixel));
+    vec4 down = texture2D(dd_feedbackSampler, st + vec2(0.0, yPixel));
+    gl_FragColor = texture2D(dd_feedbackSampler, st);
     float factor = 8.0 * 0.016 * 
       (
         1.6 * left.r + 

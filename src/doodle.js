@@ -2,7 +2,7 @@ import {setupWebGL, createProgram, pointsToBuffer, loadImage} from './helpers';
 
 import DEFAULT_VERT from './default_vert.glsl';
 import DEFAULT_FRAG from './default_frag.glsl';
-import DEFAULT_FEEDBACK_FRAG from './default_feeback_vert.glsl';
+import DEFAULT_FEEDBACK_VERT from './default_feeback_vert.glsl';
 import stdlib from './lib/stdlib.glsl';
 import shapes from './lib/shapes.glsl';
 import shaper from './lib/shaper.glsl';
@@ -39,12 +39,21 @@ export default class Doodle {
 
   constructor(canvas, opts = {}) {
     this.options = opts;
+    this.canvas = canvas;
+
+    this.setupContext();
+  }
+
+  setupContext(opts) {
+    opts = Object.assign(this.options, opts);
 
     if(opts.feedback) {
       opts.preserveDrawingBuffer = true;
       this.renderFeedBack = opts.feedback;
       delete opts.feedback;
     }
+
+    const canvas = this.canvas;
 
     const gl = setupWebGL(canvas, opts);
     this.gl = gl;
@@ -73,12 +82,11 @@ export default class Doodle {
       if(typeof this.renderFeedBack === 'function') {
         this.renderFeedBack(this.feedbackContext);
       }
-      this.setProgram(DEFAULT_FRAG, DEFAULT_FEEDBACK_FRAG);
-      this.textures = this.bindTextures([feedbackCanvas]);
-      this.setTextureCoordinate();
+      this.vertexShader = DEFAULT_FEEDBACK_VERT;
     } else {
-      this.setProgram(DEFAULT_FRAG, DEFAULT_VERT);
+      this.vertexShader = DEFAULT_VERT;
     }
+    this.fragmentShader = DEFAULT_FRAG;
   }
 
   deleteProgram() {
@@ -143,14 +151,16 @@ export default class Doodle {
       dd_randseed0: '2fv',
       dd_randseed: '2fv',
       dd_resolution: '2fv',
-      dd_rendercount: '1i',
+      dd_frameIndex: '1i',
+      dd_feebackSampler: '1i',
     });
 
     this.uniforms.dd_time = 0.0;
     this.uniforms.dd_randseed0 = [Math.random(), Math.random()];
     this.uniforms.dd_randseed = this.uniforms.dd_randseed0;
-    this.uniforms.dd_rendercount = 0;
+    this.uniforms.dd_frameIndex = 0;
     this.uniforms.dd_resolution = [gl.canvas.width, gl.canvas.height];
+    this.uniforms.dd_feebackSampler = 0;
 
     for(let i = 0; i < 32; i++) {
       const sampler = `dd_sampler${i}`;
@@ -166,6 +176,10 @@ export default class Doodle {
 
     this.program = program;
 
+    if(this.renderFeedBack) {
+      this.textures = this.bindTextures([this.feedbackContext.canvas]);
+      this.setTextureCoordinate();
+    }
     return program;
   }
 
@@ -348,9 +362,12 @@ export default class Doodle {
 
   render(opts = {}) {
     const gl = this.gl;
+    if(!this.program) this.setProgram();
     if(this.renderFeedBack) {
       const context = this.feedbackContext;
-      context.clearRect(0, 0, gl.canvas.width, gl.canvas.height);
+      context.canvas.width = gl.canvas.width;
+      context.canvas.height = gl.canvas.height;
+      // context.clearRect(0, 0, gl.canvas.width, gl.canvas.height);
       context.drawImage(gl.canvas, 0, 0);
       this.bindTextures([this.feedbackContext.canvas]);
     }
@@ -362,7 +379,7 @@ export default class Doodle {
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawElements(gl.TRIANGLES, this.cells.length * 3, gl.UNSIGNED_BYTE, 0);
 
-    this.uniforms.dd_rendercount++;
+    this.uniforms.dd_frameIndex++;
 
     if(opts.autoUpdate) {
       window.requestAnimationFrame(this.render.bind(this, opts));
