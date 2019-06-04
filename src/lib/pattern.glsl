@@ -2,8 +2,22 @@
 
 #define M_PATTERN
 
+/**
+  创建不重叠的格子，每个格子坐标范围 0.0 ~ 1.0
+ */
 vec2 grid_xy(in vec2 st, in vec2 grid) {
   return fract(st * grid);
+}
+
+/**
+  创建重叠的格子，每个格子返回坐标范围 -1.0 ~ 1.0
+ */
+void grid_overlap(in vec2 st, in vec2 grid, inout vec2 overlap[4]) {
+  vec2 v = fract(st * grid);
+  overlap[0] = v;
+  overlap[1] = v - vec2(1.0, 0.0);
+  overlap[2] = v - vec2(0.0, 1.0);
+  overlap[3] = v - vec2(1.0, 1.0);
 }
 
 vec2 grid_index(in vec2 st, in vec2 grid) {

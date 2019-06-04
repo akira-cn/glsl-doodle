@@ -267,4 +267,24 @@ UDF shape_hypocycloid(in vec2 st, const int edges) {
   return shape_hypocycloid(st, vec2(0.5), edges);
 }
 
+UDF shape_cross(in vec2 st, in vec2 center, float w, float h) {
+  vec2 p1 = center - 0.5 * vec2(w, h);
+  vec2 p2 = center - 0.5 * vec2(h, w);
+  float d1 = sdf_rect(st, p1, w, h);
+  float d2 = sdf_rect(st, p2, h, w);
+  return fill(udf_union(d1, d2), 0.01);
+}
+
+UDF shape_cross(in vec2 st, in vec2 center) {
+  return shape_cross(st, center, 0.8, 0.2);
+}
+
+UDF shape_cross(in vec2 st, float w, float h) {
+  return shape_cross(st, vec2(0.5), w, h);
+}
+
+UDF shape_cross(in vec2 st) {
+  return shape_cross(st, vec2(0.5), 0.8, 0.2);
+}
+
 #endif

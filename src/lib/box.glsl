@@ -72,23 +72,36 @@ box2 create_box() {
     vec2 单位坐标值
  */
 vec2 box_quad(in vec2 p, in box2 box) {
-  vec2 v1 = box.b - box.a;
-  vec2 v2 = box.d - box.a;
+  vec2 a = box.a;
+  vec2 b = box.b;
+  vec2 c = box.c;
+  vec2 d = box.d;
 
-  vec2 vp = p - box.a;
+  float d1 = sdf_line(p, a, b);
+  float d2 = sdf_line(p, b, c);
+  float d3 = sdf_line(p, c, d);
+  float d4 = sdf_line(p, d, a);
 
-  float d1 = vp.x * v1.y - vp.y * v1.x;
-  float d2 = vp.x * v2.y - vp.y * v2.x;
+  if(d1 >= 0.0 && d2 >= 0.0 && d3 >= 0.0 && d4 >= 0.0 ||
+     d1 <= 0.0 && d2 <= 0.0 && d3 <= 0.0 && d4 <= 0.0) {
+    
+    vec2 v1 = b - a;
+    vec2 v2 = d - a;
+    vec2 vp = p - a;
 
-  if(d1 * d2 <= 0.0) {
     float l1 = length(v1);
     float l2 = length(v2);
-    float p1 = (vp.x * v1.x + vp.y * v1.y) / pow(l1, 2.0);
-    float p2 = (vp.x * v2.x + vp.y * v2.y) / pow(l2, 2.0);
+    float p1 = dot(vp, v1) / l1;
+    float p2 = dot(vp, v2) / l2;
 
-    if(p1 >= 0.0 && p1 <= 1.0 && p2 >= 0.0 && p2 <= 1.0) {
-      return vec2(p1, p2);
-    }
+    float ang = angle(v2, v1);
+    float x = (p1 - abs(d1) / tan(ang));
+    float y = (p2 - abs(d4) / tan(ang));
+
+    x /= l1;
+    y /= l2;
+
+    return vec2(x, y);
   }
 
   return vec2(-1.0);

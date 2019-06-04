@@ -6,11 +6,11 @@
   计算向量和 box 的 transform
  */
 vec2 transform(in vec2 v0, mat3 matrix) {
-  return vec2(vec3(v0, 1.0) * matrix);
+  return vec2(matrix * vec3(v0, 1.0));
 }
 
 vec2 translate(in vec2 v0, in vec2 xy) {
-  mat3 m = mat3(1, 0, xy.x, 0, 1, xy.y, 0, 0, 1);
+  mat3 m = mat3(1, 0, 0, 0, 1, 0, xy.x, xy.y, 1);
   return transform(v0, m);
 }
 
@@ -26,7 +26,7 @@ vec2 scale(in vec2 v0, in vec2 scaleXY) {
 vec2 rotate(in vec2 v0, in vec2 origin, float ang) {
   float sinA = sin(ang);
   float cosA = cos(ang);
-  mat3 m = mat3(cosA, sinA, 0, -sinA, cosA, 0, 0, 0, 1);
+  mat3 m = mat3(cosA, -sinA, 0, sinA, cosA, 0, 0, 0, 1);
   return transform(v0 - origin, m) + origin;
 }
 

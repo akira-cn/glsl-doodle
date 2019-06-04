@@ -5,7 +5,6 @@
 #pragma include <stdlib>
 #pragma include <shaper>
 #pragma include <transform>
-#pragma include <box>
 
 /**
   有向距离场
@@ -153,11 +152,6 @@ SDF sdf_rect(in vec2 st, in vec2 p, float w, float h) {
   vec2 b = p + vec2(w, 0.0);
   vec2 c = p + vec2(w, h);
   vec2 d = p + vec2(0.0, h);
-
-  vec2 va = a - b;
-  vec2 vb = b - c;
-  vec2 vc = c - d;
-  vec2 vd = d - a;
 
   float d1 = sdf_line(st, a, b);
   float d2 = sdf_line(st, b, c);
@@ -370,6 +364,7 @@ UDF udf_complement(in UDF d1, in UDF d2) {
   return 0.0;
 }
 
+#pragma include <box>
 #pragma include <shapes>
 
 #endif

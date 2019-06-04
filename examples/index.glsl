@@ -18,45 +18,29 @@ uniform sampler2D dd_sampler0;
 varying vec2 vTextureCoord;
 
 void main() {
-  vec2 st = vTextureCoord;
-  float xPixel = 1.0 / dd_resolution.x; //The size of a single pixel
-  float yPixel = 1.0 / dd_resolution.y;
-  // vec2 st = gl_FragCoord.xy / dd_resolution;
-  box2 box = create_box();
-  // box = translate(box, vec2(xPixel, 0.0));
-  box = rotate(box, vec2(0.5 + 0.05 * sin(dd_time)), 0.02 * dd_time);
+  vec2 st =  gl_FragCoord.xy / dd_resolution.xy;
+
+  box2 box = create_box(vec2(0.25), 0.5, 0.5);
+
+  // box.a = vec2(0.25, 0.25);
+  // box.b = vec2(0.75, 0.25);
+  // box.c = vec2(0.75, 0.75) + vec2(0.2, 0);
+  // box.d = vec2(0.25, 0.75) + vec2(0.2, 0);
+
+  // box = rotate(box, vec2(0.5), PI / 10.0);
+  // box = translate(box, vec2(0.1, 0.0));
+  // box = scale(box, vec2(0.5), vec2(1.5, 1.0));
+  box = skew(box, vec2(0.5), vec2(0.7, 0.0));
+
   st = box_quad(st, box);
+  
+  // st = rotate(st, vec2(0.5), PI / 10.0);
+  // st = skew(st, vec2(0.5), vec2(0.5, 0.0));
+  // st = scale(st, vec2(0.5), vec2(1.0, 1.0));
+  
+  float d = sdf_rect(st, vec2(0.25), 0.5, 0.5);
+  // d = sdf_arc(st, vec2(0.25), 0.5, 0.0, PI / 2.0);
+  d = fill(d);
 
-  if(dd_rendercount == 0) {
-    float d = sdf_circle(st, vec2(0.4), 0.02);
-    d = fill(d);
-    gl_FragColor = vec4(d * vec3(1.0, 1.0, 1.0), 1.0);
-  } 
-  if(dd_rendercount > 0) {
-    // vec2 st = rotate(st, vec2(0.6), 0.02 * dd_time);
-    vec4 left = texture2D(dd_sampler0, st + vec2(-xPixel, 0.0));
-    vec4 right = texture2D(dd_sampler0, st + vec2(xPixel, 0.0));
-    vec4 up = texture2D(dd_sampler0, st + vec2(0.0, -yPixel));
-    vec4 down = texture2D(dd_sampler0, st + vec2(0.0, yPixel));
-    gl_FragColor = texture2D(dd_sampler0, st);
-    float factor = 8.0 * 0.016 * 
-      (
-        1.6 * left.r + 
-        right.r + 
-        down.r + 
-        3.0 * up.r - 
-        6.6 * gl_FragColor.r
-      );
-
-    float minimum = 0.003;
-    if (factor >= -minimum && factor < 0.0) factor = -minimum;
- 
-    gl_FragColor.rgb += factor;
-    gl_FragColor.a = 1.0;
-
-    float d = sdf_circle(st, vec2(0.4), 0.02);
-    if(d > 0.0) {
-      gl_FragColor.rgb += 0.5 * d;
-    }
-  }
+  color(d, vec3(0.376, 0.337, 0.619));
 }
