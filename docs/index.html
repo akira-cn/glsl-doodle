@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+  <title>SpriteJS</title>
+  <link rel="stylesheet" href="static/css/codemirror.css">
+  <link rel="stylesheet" href="static/css/theme/seti.css">
+  <link rel="stylesheet" href="static/css/style.css">
+  <script src="static/js/codemirror/codemirror.js"></script>
+  <script src="static/js/codemirror/glsl.js"></script>
+  <!-- <script src="//lib.baomitu.com/fastclick/1.0.6/fastclick.min.js"></script> -->
+  <script src="//lib.baomitu.com/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
+<div id="main">
+  <div id="menu" class="hide">
+    <div class="wrap">
+      <a href="/" class="header">Doodles</a>
+    </div>
+    <div class="wrap-menu">
+      <ul>
+        <li class="title"><a href="https://github.com/akira-cn/glsl-doodle/docs/README.md">Docs</a></li>
+        <li class="title">Examples</li>
+        <li><a href="#">quick start</a></li>
+      </ul>
+    </div>
+  </div>
+  <div id="demo">
+    <div id="paper">
+      <div class="loading">Loading</div>
+      <iframe id="sandbox"></iframe>
+    </div>
+    <div id="console-panel"><span>console</span><a href="#">clear</a></div>
+    <div id="output"></div>
+  </div>
+  <div id="code">
+    <textarea name="code"></textarea>
+  </div>
+  <div id="fork">
+    <a href="https://github.com/spritejs/spritejs"><img src="static/image/github.png"></a>
+  </div>
+  <script src="static/js/app.js"></script>
+</div>
+</body>
+</html>
