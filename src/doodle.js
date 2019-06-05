@@ -20,6 +20,17 @@ const _animationFrameID = Symbol('animationFrameID');
 const _eventHandlers = Symbol('eventHandlers');
 const _textures = Symbol('textures');
 
+async function fetchShader(url) {
+  const res = await fetch(url);
+  let content;
+  if(res.status === 404) {
+    content = DEFAULT_FRAG;
+  } else {
+    content = await res.text();
+  }
+  return content;
+}
+
 export default class Doodle {
   static uniformTypes = {
     '1f': '1f',
@@ -52,15 +63,34 @@ export default class Doodle {
       const doodleCanvas = document.querySelectorAll('canvas.glsl-doodle');
 
       doodleCanvas.forEach(async (canvas) => {
-        const fragmentURL = canvas.getAttribute('data-fragment-url') || './index.glsl';
-        const vertexURL = canvas.getAttribute('data-vert-url');
         let textures = canvas.getAttribute('data-textures');
         const doodle = new Doodle(canvas);
         if(textures) {
           textures = textures.split(/\s*,\s*/g);
           await doodle.loadTextures(...textures);
         }
-        await doodle.load(fragmentURL, vertexURL);
+
+        const fragmentEl = canvas.getAttribute('data-fragment-for');
+        const vertexEl = canvas.getAttribute('data-vertex-for');
+
+        let fragment = null;
+        let vertex = null;
+
+        if(fragmentEl) {
+          fragment = document.getElementById(fragmentEl).textContent;
+        } else {
+          const fragmentURL = canvas.getAttribute('data-fragment-url') || './index.glsl';
+          fragment = await fetchShader(fragmentURL);
+        }
+
+        if(vertexEl) {
+          vertex = vertexEl.textContent;
+        } else {
+          const vertexURL = canvas.getAttribute('data-vert-url');
+          if(vertexURL) vertex = await fetchShader(vertexURL);
+        }
+
+        await doodle.compile(fragment, vertex);
         doodle.render();
       });
     });
@@ -331,88 +361,59 @@ export default class Doodle {
     return program;
   }
 
-  async compileShader(fragmentShader) {
-    const program = await this.load(fragmentShader, null, true);
-    return program;
-  }
+  async compile(frag, vert) {
+    const loaded = {};
 
-  async compileShaders(fragmentShader, vertexShader) {
-    const program = await this.load(fragmentShader, vertexShader, true);
-    return program;
-  }
+    async function _compile(content) {
+      content = content.replace(/^\s*/mg, '');
 
-  async load(frag, vert = null, isContent = false) {
-    async function _load(glsl) {
-      const loaded = {};
-      if(!isContent) {
-        loaded[glsl] = true;
-      }
+      const includes = [];
 
-      async function _loadFile(url) {
-        let content = url;
-
-        if(!isContent) {
-          if(url.charAt(0) === '#') { // is element ID
-            content = document.querySelector(url).textContent;
-          } else {
-            const res = await fetch(url);
-            if(res.status === 404) {
-              content = DEFAULT_FRAG;
-            } else {
-              content = await res.text();
-            }
-          }
-        }
-        content = content.replace(/^\s*/mg, '');
-
-        async function parse(content) {
-          const includes = [];
-
-          const matched = content.match(/^#pragma include .*/mg);
-          if(matched) {
-            // console.log(matched, url);
-            for(let i = 0; i < matched.length; i++) {
-              const m = matched[i];
-              const _matched = m.match(/(?:<|")(.*)(?:>|")/);
-              if(_matched) {
-                const type = _matched[0].indexOf('<') === 0 ? 'lib' : 'link';
-                const name = _matched[1];
-                if(!loaded[name]) {
-                  loaded[name] = true;
-                  // TODO: 这里可以优化成异步加载
-                  if(type === 'lib') {
-                    const c = await parse(GLSL_LIBS[name]); // eslint-disable-line no-await-in-loop
-                    includes.push(c);
-                  } else if(type === 'link') {
-                    const loadedText = await _loadFile(name); // eslint-disable-line no-await-in-loop
-                    includes.push(loadedText);
-                  }
-                } else {
-                  includes.push(`/* included ${name} */`);
-                }
+      const matched = content.match(/^#pragma include .*/mg);
+      if(matched) {
+        // console.log(matched, url);
+        for(let i = 0; i < matched.length; i++) {
+          const m = matched[i];
+          const _matched = m.match(/(?:<|")(.*)(?:>|")/);
+          if(_matched) {
+            const type = _matched[0].indexOf('<') === 0 ? 'lib' : 'link';
+            const name = _matched[1];
+            if(!loaded[name]) {
+              loaded[name] = true;
+              // TODO: 这里可以优化成异步加载
+              if(type === 'lib') {
+                const c = await _compile(GLSL_LIBS[name]); // eslint-disable-line no-await-in-loop
+                includes.push(c);
+              } else if(type === 'link') {
+                let c = await fetchShader(name); // eslint-disable-line no-await-in-loop
+                c = await _compile(c); // eslint-disable-line no-await-in-loop
+                includes.push(c);
               }
+            } else {
+              includes.push(`/* included ${name} */`);
             }
-
-            includes.forEach((inc) => {
-              content = content.replace(/^#pragma include .*/m, inc);
-            });
           }
-          return content;
         }
-        content = await parse(content);
-        return content;
+
+        includes.forEach((inc) => {
+          content = content.replace(/^#pragma include .*/m, inc);
+        });
       }
 
-      const text = await _loadFile(glsl);
-      return text;
+      return content;
     }
 
-    const fragmentShader = await _load(frag);
-
-    const vertexShader = vert ? await _load(vert) : null;
+    const fragmentShader = await _compile(frag);
+    const vertexShader = vert ? await _compile(vert) : null;
     const program = this.setProgram(fragmentShader, vertexShader);
 
     return program;
+  }
+
+  async load(frag, vert = null) {
+    frag = await fetchShader(frag);
+    if(vert) vert = await fetchShader(vert);
+    return this.compile(frag, vert);
   }
 
   clearTextures() {
