@@ -15,6 +15,12 @@
       window.doodle = doodle;
 
       await doodle.load('./index.glsl');
+      doodle.declareUniforms({
+        abc: '1iv',
+      });
+      doodle.uniforms.abc = [[1.0], [3.0]];
+      // doodle.uniforms['abc[0]'] = 1.0;
+      // doodle.uniforms['abc[1]'] = 1.0;
 
       doodle.render();
     }());

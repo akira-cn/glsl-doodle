@@ -200,7 +200,7 @@ export default class Doodle {
     if(/^\s*uniform\s+\w+\s+dd_click/mg.test(fragmentShader)) {
       this[_eventHandlers].click = (e) => {
         const [x, y] = getXY(canvas, e);
-        this.uniforms.dd_click = [x, y];
+        this.uniforms.dd_click = [x, y, -1.0];
       };
       this.canvas.addEventListener('click', this[_eventHandlers].click);
     }
@@ -220,7 +220,7 @@ export default class Doodle {
       };
       this[_eventHandlers].mousedown = (e) => {
         this.uniforms.dd_mouseButtons = e.buttons;
-        this.uniforms.dd_mouseDown = e.buttons;
+        this.uniforms.dd_mouseDown = [e.buttons, -1.0];
       };
       this[_eventHandlers].mouseup = (e) => {
         this.uniforms.dd_mouseButtons = 0;
@@ -243,12 +243,12 @@ export default class Doodle {
       this[_eventHandlers].touchstart = (e) => {
         const [x, y] = getXY(canvas, e);
         this.uniforms.dd_touchPosition = [x, y];
-        this.uniforms.dd_touchStart = [x, y];
+        this.uniforms.dd_touchStart = [x, y, -1.0];
       };
       this[_eventHandlers].touchend = (e) => {
         const [x, y] = getXY(canvas, e);
         this.uniforms.dd_touchPosition = [-1.0, -1.0];
-        this.uniforms.dd_touchEnd = [x, y];
+        this.uniforms.dd_touchEnd = [x, y, -1.0];
       };
       this[_eventHandlers].touchmove = (e) => {
         const [x, y] = getXY(canvas, e);
@@ -262,10 +262,10 @@ export default class Doodle {
     if(/^\s*uniform\s+\w+\s+dd_key/mg.test(fragmentShader)) {
       this[_eventHandlers].keydown = (e) => {
         this.uniforms.dd_keyCode = e.keyCode;
-        this.uniforms.dd_keyDown = e.keyCode;
+        this.uniforms.dd_keyDown = [e.keyCode, -1.0];
       };
       this[_eventHandlers].keyup = (e) => {
-        this.uniforms.dd_keyUp = e.keyCode;
+        this.uniforms.dd_keyUp = [e.keyCode, -1.0];
         this.uniforms.dd_keyCode = -1;
       };
       document.addEventListener('keydown', this[_eventHandlers].keydown);
@@ -296,23 +296,23 @@ export default class Doodle {
 
     this.declareUniforms({
       dd_time: '1f',
-      dd_randseed0: '2fv',
-      dd_randseed: '2fv',
-      dd_resolution: '2fv',
+      dd_randseed0: '2f',
+      dd_randseed: '2f',
+      dd_resolution: '2f',
       dd_frameIndex: '1i',
       dd_samplerFeedback: '1i',
-      dd_mousePosition: '2fv',
-      dd_mouseDelta: '2fv',
-      dd_mouseButtons: '1i',
-      dd_mouseDown: '1i',
-      dd_mouseUp: '1i',
-      dd_keyCode: '1i',
-      dd_keyDown: '1i',
-      dd_keyUp: '1i',
-      dd_click: '2fv',
-      dd_touchPosition: '2fv',
-      dd_touchStart: '2fv',
-      dd_touchEnd: '2fv',
+      dd_mousePosition: '2f', // 当前鼠标位置，如果鼠标不在画布上，值为 [-1.0, -1.0]
+      dd_mouseDelta: '2f', // 当前鼠标位置变化量，与上次位置进行比较
+      dd_mouseButtons: '1i', // 当前鼠标按键情况 1 - 左键，2 - 右键，4 - 中键
+      dd_mouseDown: '2f', // 当鼠标按下时，鼠标按键值与事件发生的时间
+      dd_mouseUp: '2f', // 当鼠标松开时，鼠标按键值与事件发生时间
+      dd_keyCode: '1i', // 当键盘按下未松开时，获取键值
+      dd_keyDown: '2f', // 当键盘按下时，键值与事件发生时间
+      dd_keyUp: '2f', // 当键盘松开时，键值与事件发生时间
+      dd_click: '3f', // 得到点击的x、y坐标和点击发生的时间
+      dd_touchPosition: '2f', // 得到当前触屏位置的坐标
+      dd_touchStart: '3f', // 当触屏按下时，触碰坐标与发生时间
+      dd_touchEnd: '3f', // 当触屏松开时，触碰坐标与发生时间
     });
 
     this.uniforms.dd_time = 0.0;
@@ -324,16 +324,16 @@ export default class Doodle {
 
     this.uniforms.dd_mousePosition = [-1.0, -1.0];
     this.uniforms.dd_mouseButtons = 0;
-    this.uniforms.dd_mouseDown = 0;
-    this.uniforms.dd_mouseUp = 0;
+    this.uniforms.dd_mouseDown = [0.0, -1.0];
+    this.uniforms.dd_mouseUp = [0.0, -1.0];
     this.uniforms.dd_keyCode = 0;
-    this.uniforms.dd_keyDown = 0;
-    this.uniforms.dd_keyUp = 0;
-    this.uniforms.dd_click = [-1.0, -1.0];
+    this.uniforms.dd_keyDown = [0.0, -1.0];
+    this.uniforms.dd_keyUp = [0.0, -1.0];
+    this.uniforms.dd_click = [-1.0, -1.0, -1.0];
 
     this.uniforms.dd_touchPosition = [-1.0, -1.0];
-    this.uniforms.dd_touchStart = [-1.0, -1.0];
-    this.uniforms.dd_touchEnd = [-1.0, -1.0];
+    this.uniforms.dd_touchStart = [-1.0, -1.0, -1.0];
+    this.uniforms.dd_touchEnd = [-1.0, -1.0, -1.0];
 
     for(let i = 0; i < 32; i++) {
       const sampler = `dd_sampler${i}`;
@@ -475,16 +475,17 @@ export default class Doodle {
     const uniform = gl.getUniformLocation(this.program, name);
     let value;
     type = type.replace(/^m/, 'Matrix');
-    if(/iv$/.test(type)) {
+
+    if(/v$/.test(type)) {
       Object.defineProperty(this.uniforms, name, {
         get() {
           return value;
         },
         set(v) {
-          if(Array.isArray(v)) {
-            v = Int32Array.of(...v);
-          }
           value = v;
+          if(!Array.isArray(v)) {
+            v = [v];
+          }
           gl[`uniform${type}`](uniform, v);
         },
         configurable: false,
@@ -497,7 +498,10 @@ export default class Doodle {
         },
         set(v) {
           value = v;
-          gl[`uniform${type}`](uniform, v);
+          if(!Array.isArray(v)) {
+            v = [v];
+          }
+          gl[`uniform${type}`](uniform, ...v);
         },
         configurable: false,
         enumerable: true,
@@ -524,20 +528,44 @@ export default class Doodle {
     }
     if(!this.startTime) this.startTime = Date.now();
 
-    this.uniforms.dd_time = (Date.now() - this.startTime) / 1000;
+    const time = (Date.now() - this.startTime) / 1000;
     this.uniforms.dd_randseed = [Math.random(), Math.random()];
+
+    let [x, y, t] = this.uniforms.dd_click;
+    if(x >= 0 && t < 0) {
+      this.uniforms.dd_click = [x, y, time];
+    }
+    [x, t] = this.uniforms.dd_mouseDown;
+    if(x > 0 && t < 0) {
+      this.uniforms.dd_mouseDown = [x, time];
+    }
+    [x, t] = this.uniforms.dd_mouseUp;
+    if(x > 0 && t < 0) {
+      this.uniforms.dd_mouseUp = [x, time];
+    }
+    [x, t] = this.uniforms.dd_keyDown;
+    if(x > 0 && t < 0) {
+      this.uniforms.dd_keyDown = [x, time];
+    }
+    [x, t] = this.uniforms.dd_keyUp;
+    if(x > 0 && t < 0) {
+      this.uniforms.dd_keyUp = [x, time];
+    }
+    [x, y, t] = this.uniforms.dd_touchStart;
+    if(x > 0 && t < 0) {
+      this.uniforms.dd_touchStart = [x, y, time];
+    }
+    [x, y, t] = this.uniforms.dd_touchEnd;
+    if(x > 0 && t < 0) {
+      this.uniforms.dd_touchEnd = [x, y, time];
+    }
+
+    this.uniforms.dd_time = time;
 
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawElements(gl.TRIANGLES, this.cells.length * 3, gl.UNSIGNED_BYTE, 0);
 
     this.uniforms.dd_frameIndex++;
-    this.uniforms.dd_keyDown = 0;
-    this.uniforms.dd_keyUp = 0;
-    this.uniforms.dd_mouseDown = 0;
-    this.uniforms.dd_mouseUp = 0;
-    this.uniforms.dd_click = [-1.0, -1.0];
-    this.uniforms.dd_touchStart = [-1.0, -1.0];
-    this.uniforms.dd_touchEnd = [-1.0, -1.0];
 
     if(this[_autoUpdate]) {
       this[_animationFrameID] = window.requestAnimationFrame(this.render.bind(this));

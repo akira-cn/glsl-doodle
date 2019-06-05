@@ -7,22 +7,29 @@ precision mediump float;
 #pragma include <color>
 #pragma include <pattern>
 
-// uniform float dd_time;
+uniform float dd_time;
 uniform vec2 dd_randseed0;
 uniform vec2 dd_resolution;
 uniform int dd_keyUp;
+uniform vec2 dd_keyDown;
 uniform int dd_frameIndex;
 // uniform int dd_mouseDown;
-uniform vec2 dd_click;
+uniform vec3 dd_click;
 uniform vec2 dd_touchPosition;
 
 uniform sampler2D dd_samplerFeedback;
 
+uniform int abc[2];
+
 varying vec2 vTextureCoord;
 
 void main() {
+  if(abc[1] == 2) return;
   vec2 st =  gl_FragCoord.xy / dd_resolution.xy;
-  if(dd_frameIndex == 0 || dd_keyUp == 70 || dd_click.x >= 0.0 || dd_touchPosition.x >= 0.0) {
+  if(dd_frameIndex == 0
+    || dd_keyDown.s == 70.0 && dd_keyDown.t == dd_time
+    || dd_click.x >= 0.0 && dd_click.z == dd_time
+    || dd_touchPosition.x >= 0.0) {
     box2 box = create_box(vec2(0.25), 0.5, 0.5);
 
     // box.a = vec2(0.25, 0.25);
