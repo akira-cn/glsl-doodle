@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>GLSL Doodle</title>
+  <script src="/js/glsl-doodle.js"></script>
+</head>
+<body>
+  <canvas class="glsl-doodle" width="512" height="512"></canvas>
+  <canvas class="glsl-doodle" width="512" height="512"></canvas>
+  <canvas class="glsl-doodle" width="512" height="512" data-fragment-url="#my-shader"></canvas>
+  <script id="my-shader" type="text/glsl">
+    #ifdef GL_ES
+    precision mediump float;
+    #endif
+    
+    #pragma include <stdlib>
+    #pragma include <graph>
+    #pragma include <color>
+    #pragma include <pattern>
+    
+    uniform vec2 dd_randseed0;
+    uniform vec2 dd_resolution;
+    
+    void main() {
+      vec2 st = gl_FragCoord.xy / dd_resolution;
+      float d = sdf_circle(st, vec2(0.5), 0.2);
+      d = fill(d);
+      gl_FragColor = d * vec4(hsb2rgb(vec3(random(dd_randseed0), 1.0, 1.0)), 1.0);
+    }  
+  </script>
+</body>
+</html>

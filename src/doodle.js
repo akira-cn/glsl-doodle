@@ -352,8 +352,16 @@ export default class Doodle {
         let content = url;
 
         if(!isContent) {
-          const res = await fetch(url);
-          content = await res.text();
+          if(url.charAt(0) === '#') { // is element ID
+            content = document.querySelector(url).textContent;
+          } else {
+            const res = await fetch(url);
+            if(res.status === 404) {
+              content = DEFAULT_FRAG;
+            } else {
+              content = await res.text();
+            }
+          }
         }
         content = content.replace(/^\s*/mg, '');
 
