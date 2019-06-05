@@ -7,9 +7,7 @@ precision mediump float;
 #pragma include <color>
 #pragma include <pattern>
 
-uniform float dd_time;
 uniform vec2 dd_resolution;
-uniform vec2 dd_randseed;
 uniform vec2 dd_randseed0;
 
 SDF gasket(in vec2 st, in vec2 a, in vec2 b, in vec2 c) {

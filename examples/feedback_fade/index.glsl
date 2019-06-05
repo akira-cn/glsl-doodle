@@ -12,7 +12,7 @@ uniform vec2 dd_randseed0;
 uniform vec2 dd_resolution;
 uniform int dd_frameIndex;
 
-uniform sampler2D dd_sampler0;
+uniform sampler2D dd_samplerFeedback;
 varying highp vec2 vTextureCoord;
 
 void main() {
@@ -29,10 +29,10 @@ void main() {
     d = fill(d, 0.5);
     gl_FragColor = vec4(d * vec3(1.0, 1.0, 1.0), 1.0);
   } else {
-    vec4 left = texture2D(dd_sampler0, st + vec2(-0.01, 0.0));
-    vec4 right = texture2D(dd_sampler0, st + vec2(0.01, 0.0));
-    vec4 up = texture2D(dd_sampler0, st + vec2(0.0, -0.01));
-    vec4 down = texture2D(dd_sampler0, st + vec2(0.0, 0.01));
+    vec4 left = texture2D(dd_samplerFeedback, st + vec2(-0.01, 0.0));
+    vec4 right = texture2D(dd_samplerFeedback, st + vec2(0.01, 0.0));
+    vec4 up = texture2D(dd_samplerFeedback, st + vec2(0.0, -0.01));
+    vec4 down = texture2D(dd_samplerFeedback, st + vec2(0.0, 0.01));
     gl_FragColor = (left + right + up + down) / 4.0;
   }
 }

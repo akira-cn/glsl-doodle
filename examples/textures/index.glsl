@@ -7,10 +7,7 @@ precision mediump float;
 #pragma include <color>
 #pragma include <pattern>
 
-uniform vec2 abc;
-uniform float dd_time;
 uniform vec2 dd_resolution;
-uniform vec2 dd_randseed;
 uniform vec2 dd_randseed0;
 
 varying highp vec2 vTextureCoord;

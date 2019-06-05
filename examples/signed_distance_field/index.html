@@ -4,23 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
+  <title>GLSL Doodle</title>
   <script src="/js/glsl-doodle.js"></script>
 </head>
 <body>
-  <canvas id="glDoodle" width="512" height="512"></canvas>
-  <script>
-    (async function () {
-      const doodle = new Doodle(glDoodle);
-
-      await doodle.load('./index.glsl');
-
-      doodle.render({
-        autoUpdate: true,
-      });
-
-      window.doodle = doodle;
-    }());
-  </script>
+  <canvas class="glsl-doodle" width="512" height="512"></canvas>
 </body>
 </html>

@@ -1,1 +1,5 @@
-module.exports = require('./doodle').default;
+const Doodle = require('./doodle').default;
+
+Doodle.autoLoad();
+
+module.exports = Doodle;

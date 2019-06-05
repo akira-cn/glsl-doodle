@@ -7,9 +7,7 @@ precision mediump float;
 #pragma include <color>
 #pragma include <pattern>
 
-uniform float dd_time;
 uniform vec2 dd_resolution;
-uniform vec2 dd_randseed;
 uniform vec2 dd_randseed0;
 
 UDF random_shap(in vec2 st, in vec2 seed) {

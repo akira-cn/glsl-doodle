@@ -11,16 +11,12 @@
   <canvas id="glDoodle" width="512" height="512"></canvas>
   <script>
     (async function () {
-      const doodle = new Doodle(glDoodle, {
-        // feedback: true,
-      });
+      const doodle = new Doodle(glDoodle);
       window.doodle = doodle;
 
       await doodle.load('./index.glsl');
 
-      doodle.render({
-        autoUpdate: true,
-      });
+      doodle.render();
     }());
   </script>
 </body>

@@ -6,10 +6,7 @@ precision mediump float;
 #pragma include <graph>
 #pragma include <pattern>
 
-uniform vec2 abc;
-uniform float dd_time;
 uniform vec2 dd_resolution;
-uniform vec2 dd_randseed;
 
 float fx(in float x) {
   return 0.0;

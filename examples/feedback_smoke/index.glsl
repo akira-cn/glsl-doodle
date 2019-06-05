@@ -13,7 +13,7 @@ uniform vec2 dd_resolution;
 
 uniform int dd_frameIndex;
 
-uniform sampler2D dd_feedbackSampler;
+uniform sampler2D dd_samplerFeedback;
 
 varying vec2 vTextureCoord;
 
@@ -34,11 +34,11 @@ void main() {
   } 
   if(dd_frameIndex > 0) {
     // vec2 st = rotate(st, vec2(0.6), 0.02 * dd_time);
-    vec4 left = texture2D(dd_feedbackSampler, st + vec2(-xPixel, 0.0));
-    vec4 right = texture2D(dd_feedbackSampler, st + vec2(xPixel, 0.0));
-    vec4 up = texture2D(dd_feedbackSampler, st + vec2(0.0, -yPixel));
-    vec4 down = texture2D(dd_feedbackSampler, st + vec2(0.0, yPixel));
-    gl_FragColor = texture2D(dd_feedbackSampler, st);
+    vec4 left = texture2D(dd_samplerFeedback, st + vec2(-xPixel, 0.0));
+    vec4 right = texture2D(dd_samplerFeedback, st + vec2(xPixel, 0.0));
+    vec4 up = texture2D(dd_samplerFeedback, st + vec2(0.0, -yPixel));
+    vec4 down = texture2D(dd_samplerFeedback, st + vec2(0.0, yPixel));
+    gl_FragColor = texture2D(dd_samplerFeedback, st);
     float factor = 8.0 * 0.016 * 
       (
         1.6 * left.r + 
