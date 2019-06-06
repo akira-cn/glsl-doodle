@@ -163,7 +163,6 @@ export default class Doodle {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, pointsToBuffer(cells, Uint8Array), gl.STATIC_DRAW);
     this.vertices = vertices;
     this.cells = cells;
-    if(this[_textures]) this.bindTextures(this[_textures]);
   }
 
   setProgram(fragmentShader, vertexShader) {
@@ -340,7 +339,7 @@ export default class Doodle {
       this.declareUniforms({
         [sampler]: '1i',
       });
-      this.uniforms[sampler] = i;
+      // this.uniforms[sampler] = i;
     }
 
     const vPosition = gl.getAttribLocation(program, 'a_position');
@@ -349,10 +348,10 @@ export default class Doodle {
 
     this.program = program;
 
-    const textures = this.textures || [];
+    let textures = this.textures || [];
 
     if(this[_renderFeedback]) {
-      textures.unshift(this.feedbackContext.canvas);
+      textures = [this.feedbackContext.canvas, ...textures];
     }
     if(textures.length) {
       this[_textures] = this.bindTextures(textures);
@@ -369,7 +368,7 @@ export default class Doodle {
 
       const includes = [];
 
-      const matched = content.match(/^#pragma include .*/mg);
+      const matched = content.match(/^#pragma\s+include\s+.*/mg);
       if(matched) {
         // console.log(matched, url);
         for(let i = 0; i < matched.length; i++) {
@@ -396,11 +395,20 @@ export default class Doodle {
         }
 
         includes.forEach((inc) => {
-          content = content.replace(/^#pragma include .*/m, inc);
+          content = content.replace(/^#pragma\s+include\s+.*/m, inc);
         });
       }
 
       return content;
+    }
+
+    const matches = frag.match(/^#pragma\s+texture\s+.*/mg);
+    if(matches) {
+      const imgs = await Promise.all(matches.map((m) => {
+        const p = m.match(/^#pragma\s+texture\s+(.*)/);
+        return loadImage(p[1]);
+      }));
+      this.textures = this.textures ? [...this.textures, ...imgs] : imgs;
     }
 
     const fragmentShader = await _compile(frag);
@@ -427,7 +435,6 @@ export default class Doodle {
   }
 
   bindTextures(sources) {
-    this.clearTextures();
     return sources.map((source, i) => {
       const gl = this.gl;
       gl.activeTexture(gl.TEXTURE0 + i);
@@ -442,6 +449,11 @@ export default class Doodle {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       // Prevents t-coordinate wrapping (repeating).
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      if(this.renderFeedback) {
+        if(i > 0) this.uniforms[`dd_sampler${i - 1}`] = i;
+      } else {
+        this.uniforms[`dd_sampler${i}`] = i;
+      }
       return texture;
     });
   }
@@ -476,37 +488,23 @@ export default class Doodle {
     let value;
     type = type.replace(/^m/, 'Matrix');
 
-    if(/v$/.test(type)) {
-      Object.defineProperty(this.uniforms, name, {
-        get() {
-          return value;
-        },
-        set(v) {
-          value = v;
-          if(!Array.isArray(v)) {
-            v = [v];
-          }
-          gl[`uniform${type}`](uniform, v);
-        },
-        configurable: false,
-        enumerable: true,
-      });
-    } else {
-      Object.defineProperty(this.uniforms, name, {
-        get() {
-          return value;
-        },
-        set(v) {
-          value = v;
-          if(!Array.isArray(v)) {
-            v = [v];
-          }
-          gl[`uniform${type}`](uniform, ...v);
-        },
-        configurable: false,
-        enumerable: true,
-      });
-    }
+    const isTypeV = /v$/.test(type);
+
+    Object.defineProperty(this.uniforms, name, {
+      get() {
+        return value;
+      },
+      set(v) {
+        value = v;
+        if(!Array.isArray(v)) {
+          v = [v];
+        }
+        if(isTypeV) gl[`uniform${type}`](uniform, v);
+        else gl[`uniform${type}`](uniform, ...v);
+      },
+      configurable: false,
+      enumerable: true,
+    });
   }
 
   declareUniforms(uniforms) {

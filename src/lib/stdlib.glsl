@@ -11,7 +11,7 @@
 #endif
 
 // https://math.stackexchange.com/questions/1098487/atan2-faster-approximation
-float atan2(in float dy, in float dx) {
+float atan2(float dy, float dx) {
   float ax = abs(dx);
   float ay = abs(dy);
   float a = min(ax, ay) / (max(ax, ay) + FLT_EPSILON);
@@ -23,28 +23,28 @@ float atan2(in float dy, in float dx) {
   return r;
 }
 
-float atan2(in vec2 v) {
+float atan2(vec2 v) {
   return atan2(v.y, v.x);
 }
 
 /**
   从 v1 相对 v2 的逆时针夹角, 0 ~ 2 * PI
  */
-float angle(in vec2 v1, in vec2 v2) {
+float angle(vec2 v1, vec2 v2) {
   float ang = atan2(v1) - atan2(v2);
   if(ang < 0.0) ang += 2.0 * PI;
   return ang;
 }
 
-float angle(in vec2 v) {
+float angle(vec2 v) {
   return angle(v, vec2(1.0, 0.0));
 }
 
-vec2 center(in vec2 v) {
+vec2 center(vec2 v) {
   return v * 0.5;
 }
 
-vec2 center(in vec2 v1, in vec2 v2) {
+vec2 center(vec2 v1, vec2 v2) {
   return (v1 + v2) * 0.5;
 }
 
@@ -81,7 +81,7 @@ float noise(vec2 st) {
 /**
   将直角坐标转为极坐标
  */
-vec2 polar(in vec2 st, in vec2 c) {
+vec2 polar(vec2 st, vec2 c) {
   vec2 p = c - st;
   float r = length(p) * 2.0;
   float a = atan(p.y, p.x);
@@ -89,7 +89,7 @@ vec2 polar(in vec2 st, in vec2 c) {
   return vec2(r, a);  
 }
 
-vec2 polar(in vec2 st) {
+vec2 polar(vec2 st) {
   return polar(st, vec2(0.5));
 }
 

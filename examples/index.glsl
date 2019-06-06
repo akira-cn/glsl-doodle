@@ -2,6 +2,8 @@
 precision mediump float;
 #endif
 
+#pragma texture https://p4.ssl.qhimg.com/t012170360e1552ce17.png
+
 #pragma include <stdlib>
 #pragma include <graph>
 #pragma include <color>
@@ -18,6 +20,7 @@ uniform vec3 dd_click;
 uniform vec2 dd_touchPosition;
 
 uniform sampler2D dd_samplerFeedback;
+uniform sampler2D dd_sampler0;
 
 uniform int abc[2];
 
@@ -51,7 +54,8 @@ void main() {
     float d = sdf_rect(st, vec2(0.25), 0.5, 0.5);
     // d = sdf_arc(st, vec2(0.25), 0.5, 0.0, PI / 2.0);
     d = fill(d);
-    color(d, hsb2rgb(vec3(random(dd_randseed0 + float(dd_frameIndex)), 1.0, 1.0)));
+    // gl_FragColor = d * HSB(random(dd_randseed0 + float(dd_frameIndex)), 1.0, 1.0);
+    gl_FragColor = d * texture2D(dd_sampler0, st);
   } else {
     gl_FragColor = texture2D(dd_samplerFeedback, st);
   }

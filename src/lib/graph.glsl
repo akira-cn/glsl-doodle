@@ -46,7 +46,7 @@
 /**
   点到直线的距离
  */
-SDF sdf_line(in vec2 p, in vec2 v1, in vec2 v2) {
+SDF sdf_line(vec2 p, vec2 v1, vec2 v2) {
   vec2 pd = p - v1;
   vec2 pd2 = p - v2;
   vec2 seg = v2 - v1;
@@ -54,7 +54,7 @@ SDF sdf_line(in vec2 p, in vec2 v1, in vec2 v2) {
   return (pd.x * seg.y - pd.y * seg.x) / length(seg);
 }
 
-SDF sdf_line(in vec2 p, in vec2 v) {
+SDF sdf_line(vec2 p, vec2 v) {
   return sdf_line(p, vec2(0), v);
 }
 
@@ -69,7 +69,7 @@ SDF sdf_line(in vec2 p, in vec2 v) {
   返回值：
     float   距离
  */
-SDF sdf_seg(in vec2 p, in vec2 v1, in vec2 v2) {
+SDF sdf_seg(vec2 p, vec2 v1, vec2 v2) {
   vec2 pd = p - v1;
   vec2 pd2 = p - v2;
   vec2 seg = v2 - v1;
@@ -83,7 +83,7 @@ SDF sdf_seg(in vec2 p, in vec2 v1, in vec2 v2) {
   return min(length(pd), length(pd2));
 }
 
-SDF sdf_seg(in vec2 p, in vec2 v) {
+SDF sdf_seg(vec2 p, vec2 v) {
   return sdf_seg(p, vec2(0), v);
 }
 
@@ -99,14 +99,14 @@ SDF sdf_seg(in vec2 p, in vec2 v) {
   返回值：
     SDF 距离
  */
-SDF sdf_plot(in vec2 p, in vec2 v1, in vec2 v2, in vec2 v3) {
+SDF sdf_plot(vec2 p, vec2 v1, vec2 v2, vec2 v3) {
   float d1 = sdf_seg(p, v1, v2);
   float d2 = sdf_seg(p, v2, v3);
 
   return min(d1, d2);
 }
 
-UDF stroke(in SDF d, in float d0, in float w, in float smth) {
+UDF stroke(SDF d, float d0, float w, float smth) {
   float th = 0.5 * w;
   smth = smth * w;
   float start = d0 - th;
@@ -114,18 +114,18 @@ UDF stroke(in SDF d, in float d0, in float w, in float smth) {
   return smoothstep(start, start + smth, d) - smoothstep(end - smth, end, d);
 }
 
-UDF stroke(in SDF d, in float w, in float smth) {
+UDF stroke(SDF d, float w, float smth) {
   return stroke(d, 0.0, w, smth);
 }
 
-UDF stroke(in SDF d, in float w) {
+UDF stroke(SDF d, float w) {
   return stroke(d, 0.0, w, 0.0);
 }
 
 /**
   三角形的 SDF
  */
-SDF sdf_triangle(in vec2 st, in vec2 a, in vec2 b, in vec2 c) {
+SDF sdf_triangle(vec2 st, vec2 a, vec2 b, vec2 c) {
   vec2 va = a - b;
   vec2 vb = b - c;
   vec2 vc = c - a;
@@ -147,7 +147,7 @@ SDF sdf_triangle(in vec2 st, in vec2 a, in vec2 b, in vec2 c) {
   return -min(abs(d1), min(abs(d2), abs(d3))) / l;
 }
 
-SDF sdf_rect(in vec2 st, in vec2 p, float w, float h) {
+SDF sdf_rect(vec2 st, vec2 p, float w, float h) {
   vec2 a = p;
   vec2 b = p + vec2(w, 0.0);
   vec2 c = p + vec2(w, h);
@@ -173,16 +173,16 @@ SDF sdf_rect(in vec2 st, in vec2 p, float w, float h) {
   return -min(abs(d1), min(abs(d2), min(abs(d3), abs(d4)))) / l;
 }
 
-SDF sdf_circle(in vec2 st, in vec2 c, float r) {
+SDF sdf_circle(vec2 st, vec2 c, float r) {
   return 1.0 - length(st - c) / r;
 }
 
-SDF sdf_ellipse(in vec2 st, in vec2 c, in float a, in float b) {
+SDF sdf_ellipse(vec2 st, vec2 c, float a, float b) {
   vec2 p = st - c;
   return 1.0 - sqrt(pow(p.x / a, 2.0) + pow(p.y / b, 2.0));
 }
 
-SDF sdf_ellipse(in vec2 st, in vec2 c, in float a, in float b, in float sAng, in float eAng) {
+SDF sdf_ellipse(vec2 st, vec2 c, float a, float b, float sAng, float eAng) {
   vec2 ua = vec2(cos(sAng), sin(sAng));
   vec2 ub = vec2(cos(eAng), sin(eAng));
 
@@ -237,11 +237,11 @@ SDF sdf_ellipse(in vec2 st, in vec2 c, in float a, in float b, in float sAng, in
   }
 }
 
-SDF sdf_arc(in vec2 st, in vec2 c, float r, in float sAng, in float eAng) {
+SDF sdf_arc(vec2 st, vec2 c, float r, float sAng, float eAng) {
   return sdf_ellipse(st, c, r, r, sAng, eAng);
 }
 
-SDF sdf_rhombus(in vec2 st, in vec2 cr, float w, float h) {
+SDF sdf_rhombus(vec2 st, vec2 cr, float w, float h) {
   vec2 a = cr - vec2(0.5 * w, 0);
   vec2 b = cr - vec2(0, 0.5 * h);
   vec2 c = cr + vec2(0.5 * w, 0);
@@ -275,7 +275,7 @@ SDF sdf_rhombus(in vec2 st, in vec2 cr, float w, float h) {
 /**
   正多边形(含内摆线)
  */
-SDF regular_polygon(in vec2 st, in vec2 center, in float r, float rotation, const int edges, bool hypocycloid) {
+SDF regular_polygon(vec2 st, vec2 center, float r, float rotation, const int edges, bool hypocycloid) {
   vec2 p = st - center;
   vec2 v0 = vec2(0, r); // 第一个顶点
   v0 = rotate(v0, -rotation);
@@ -306,37 +306,37 @@ SDF regular_polygon(in vec2 st, in vec2 center, in float r, float rotation, cons
   return d / l; 
 }
 
-SDF regular_polygon(in vec2 st, in vec2 center, in float r, float rotation, const int edges) {
+SDF regular_polygon(vec2 st, vec2 center, float r, float rotation, const int edges) {
   return regular_polygon(st, center, r, rotation, edges, false);
 }
 
-SDF regular_polygon(in vec2 st, in vec2 center, in float r, const int edges, bool hypocycloid) {
+SDF regular_polygon(vec2 st, vec2 center, float r, const int edges, bool hypocycloid) {
   return regular_polygon(st, center, r, 0.0, edges, true);
 }
 
-SDF regular_polygon(in vec2 st, in vec2 center, in float r, const int edges) {
+SDF regular_polygon(vec2 st, vec2 center, float r, const int edges) {
   return regular_polygon(st, center, r, 0.0, edges, false);
 }
 
-UDF fill(in SDF d, in float start, in float end, in float smth_start, float smth_end) {
+UDF fill(SDF d, float start, float end, float smth_start, float smth_end) {
   smth_start = (end - start) * smth_start;
   smth_end = (end - start) * smth_end;
   return smoothstep(start, start + smth_start, d) - smoothstep(end - smth_end, end, d);
 }
 
-UDF fill(in SDF d, in float start, in float end, in float smth) {
+UDF fill(SDF d, float start, float end, float smth) {
   return fill(d, start, end, smth, smth);
 }
 
-UDF fill(in SDF d, in float start, in float smth) {
+UDF fill(SDF d, float start, float smth) {
   return fill(d, start, 1.0, smth, 0.0);
 }
 
-UDF fill(in SDF d, in float smth) {
+UDF fill(SDF d, float smth) {
   return fill(d, 0.0, 1.0, smth, 0.0);
 }
 
-UDF fill(in SDF d) {
+UDF fill(SDF d) {
   return fill(d, 0.0, 1.0, 0.0, 0.0);
 }
 
@@ -344,14 +344,14 @@ UDF fill(in SDF d) {
   complement(d1, d2, d3...) = complement(union(d1, d2, d3...), intersect(d1, d2, d3...))
  */
 
-UDF udf_intersect(in UDF d1, in UDF d2) {
+UDF udf_intersect(UDF d1, UDF d2) {
   if(d1 > 0.0 && d2 > 0.0) {
     return min(d1, d2);
   }
   return 0.0;
 }
 
-UDF udf_union(in UDF d1, in UDF d2) {
+UDF udf_union(UDF d1, UDF d2) {
   if(d1 > 0.0 || d2 > 0.0) {
     return max(d1, d2);
   }
@@ -359,7 +359,7 @@ UDF udf_union(in UDF d1, in UDF d2) {
 }
 
 // 无法消除锯齿
-UDF udf_complement(in UDF d1, in UDF d2) {
+UDF udf_complement(UDF d1, UDF d2) {
   if(d1 > 0.0 && d2 == 0.0 || d1 == 0.0 && d2 > 0.0) return 1.0;
   return 0.0;
 }

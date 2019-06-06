@@ -15,7 +15,7 @@ struct box2 {
 /**
   求 box2 的中心点
  */
-vec2 center(in box2 box) {
+vec2 center(box2 box) {
   return (box.a + box.c) * 0.5;
 }
 
@@ -31,7 +31,7 @@ vec2 center(in box2 box) {
   返回值：
     box2
  */
-box2 create_box(in vec2 point, float w, float h, in vec2 anchor) {
+box2 create_box(vec2 point, float w, float h, vec2 anchor) {
   vec2 size = vec2(w, h);
   vec2 a = point + size * (vec2(0.0) - anchor);
   vec2 b = point + size * (vec2(1.0, 0.0) - anchor);
@@ -41,11 +41,11 @@ box2 create_box(in vec2 point, float w, float h, in vec2 anchor) {
   return box2(a, b, c, d);  
 }
 
-box2 create_box(in vec2 point, float w, float h) {
+box2 create_box(vec2 point, float w, float h) {
   return create_box(point, w, h, vec2(0.0));
 }
 
-box2 create_box(in vec2 point, float wh) {
+box2 create_box(vec2 point, float wh) {
   return create_box(point, wh, wh, vec2(0.0));
 }
 
@@ -71,7 +71,7 @@ box2 create_box() {
   返回值：
     vec2 单位坐标值
  */
-vec2 box_quad(in vec2 p, in box2 box) {
+vec2 box_quad(vec2 p, box2 box) {
   vec2 a = box.a;
   vec2 b = box.b;
   vec2 c = box.c;
@@ -107,7 +107,7 @@ vec2 box_quad(in vec2 p, in box2 box) {
   return vec2(-1.0);
 }
 
-box2 transform(in box2 box, mat3 matrix) {
+box2 transform(box2 box, mat3 matrix) {
   return box2(
     transform(box.a, matrix),
     transform(box.b, matrix),
@@ -116,7 +116,7 @@ box2 transform(in box2 box, mat3 matrix) {
   );
 }
 
-box2 translate(in box2 box, in vec2 xy) {
+box2 translate(box2 box, vec2 xy) {
   return box2(
     translate(box.a, xy), 
     translate(box.b, xy), 
@@ -125,7 +125,7 @@ box2 translate(in box2 box, in vec2 xy) {
   );
 }
 
-box2 scale(in box2 box, in vec2 origin, in vec2 scaleXY) {
+box2 scale(box2 box, vec2 origin, vec2 scaleXY) {
   return box2(
     scale(box.a, origin, scaleXY), 
     scale(box.b, origin, scaleXY), 
@@ -134,7 +134,7 @@ box2 scale(in box2 box, in vec2 origin, in vec2 scaleXY) {
   );
 }
 
-box2 scale(in box2 box, in vec2 scaleXY) {
+box2 scale(box2 box, vec2 scaleXY) {
   return box2(
     scale(box.a, scaleXY), 
     scale(box.b, scaleXY), 
@@ -143,7 +143,7 @@ box2 scale(in box2 box, in vec2 scaleXY) {
   );
 }
 
-box2 rotate(in box2 box, in vec2 origin, float ang) {
+box2 rotate(box2 box, vec2 origin, float ang) {
   return box2(
     rotate(box.a, origin, ang),
     rotate(box.b, origin, ang),
@@ -152,7 +152,7 @@ box2 rotate(in box2 box, in vec2 origin, float ang) {
   );
 }
 
-box2 rotate(in box2 box, float ang) {
+box2 rotate(box2 box, float ang) {
   return box2(
     rotate(box.a, ang),
     rotate(box.b, ang),
@@ -161,7 +161,7 @@ box2 rotate(in box2 box, float ang) {
   );
 }
 
-box2 skew(in box2 box, in vec2 origin, in vec2 skewXY) {
+box2 skew(box2 box, vec2 origin, vec2 skewXY) {
   return box2(
     skew(box.a, origin, skewXY),
     skew(box.b, origin, skewXY),
@@ -170,7 +170,7 @@ box2 skew(in box2 box, in vec2 origin, in vec2 skewXY) {
   );
 }
 
-box2 skew(in box2 box, in vec2 skewXY) {
+box2 skew(box2 box, vec2 skewXY) {
   return box2(
     skew(box.a, skewXY),
     skew(box.b, skewXY),

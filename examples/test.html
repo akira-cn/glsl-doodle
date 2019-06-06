@@ -14,6 +14,9 @@
       const doodle = new Doodle(glDoodle);
       window.doodle = doodle;
 
+      // await doodle.loadTextures(
+      //   'https://p4.ssl.qhimg.com/t012170360e1552ce17.png'
+      // );
       await doodle.load('./index.glsl');
       doodle.declareUniforms({
         abc: '1iv',
