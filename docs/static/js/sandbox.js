@@ -37,4 +37,4 @@ console.error = makeOutput(console.error, 'error');
 /* eslint-enable no-console */
 
 window.exec = exec;
-window.top.codeChange();
+window.parent.codeChange();
