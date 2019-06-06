@@ -254,6 +254,7 @@ a.selected {
 .cm-s-seti.CodeMirror {
   height: 100%;
   width: 100%;
+  font-size: 1.5rem;
 }
 
 @media screen and (max-width:480px){

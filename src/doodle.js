@@ -8,11 +8,11 @@ import shapes from './lib/shapes.glsl';
 import shaper from './lib/shaper.glsl';
 import box from './lib/box.glsl';
 import transform from './lib/transform.glsl';
-import graph from './lib/graph.glsl';
+import graphics from './lib/graph.glsl';
 import color from './lib/color.glsl';
 import pattern from './lib/pattern.glsl';
 
-const GLSL_LIBS = {stdlib, box, transform, graph, color, pattern, shapes, shaper};
+const GLSL_LIBS = {stdlib, box, transform, graphics, color, pattern, shapes, shaper};
 
 const _renderFeedback = Symbol('renderFeedback');
 const _autoUpdate = Symbol('autoUpdate');
@@ -376,7 +376,8 @@ export default class Doodle {
           const _matched = m.match(/(?:<|")(.*)(?:>|")/);
           if(_matched) {
             const type = _matched[0].indexOf('<') === 0 ? 'lib' : 'link';
-            const name = _matched[1];
+            let name = _matched[1];
+            if(name === 'graph') name = 'graphics';
             if(!loaded[name]) {
               loaded[name] = true;
               // TODO: 这里可以优化成异步加载

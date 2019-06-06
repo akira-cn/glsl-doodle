@@ -80,24 +80,29 @@ menu.addEventListener('mouseleave', function (evt) {
 });
 var menuLinks = document.querySelectorAll('#menu a');
 
+function loadFile(codefile) {
+  loadingState.style.display = 'block';
+  loadingState.className = 'loading';
+  fetch("/static/code/".concat(codefile, ".glsl")).then(function (res) {
+    return res.text();
+  }).then(function (code) {
+    editor.setValue(code);
+  });
+}
+
 function updateMenuState() {
+  const hash = window.location.hash;
   menuLinks.forEach(function (link) {
     if (!link.parentElement.className) {
-      if (link.hash === window.location.hash) {
+      if (link.hash === hash) {
         link.className = 'selected';
-        var codefile = link.hash ? link.hash.slice(1) : 'index';
-        loadingState.style.display = 'block';
-        loadingState.className = 'loading';
-        fetch("/static/code/".concat(codefile, ".glsl")).then(function (res) {
-          return res.text();
-        }).then(function (code) {
-          editor.setValue(code);
-        });
       } else {
         link.className = '';
       }
     }
   });
+  var codefile = hash ? hash.slice(1) : 'index';
+  loadFile(codefile);
 }
 
 updateMenuState();
