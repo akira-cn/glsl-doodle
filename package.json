@@ -6,7 +6,7 @@
   "scripts": {
     "start": "webpack-dev-server --env.server=examples --watch-poll",
     "doc": "http-server docs -c-1 -p3030",
-    "build": "webpack --env.production=true",
+    "build": "webpack --env.production=true && cp dist/glsl-doodle.js docs/static/js/",
     "lint": "eslint 'src/**/*.js' --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

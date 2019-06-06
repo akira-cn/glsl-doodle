@@ -56,6 +56,10 @@ clearBtn.addEventListener('click', function (evt) {
 });
 var menu = document.getElementById('menu');
 
+if(window.top !== window) {
+  menu.style.display = 'none';
+}
+
 function menuFade() {
   menu.className = 'fade';
   menu.timer = setTimeout(function () {
