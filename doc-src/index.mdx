@@ -1,0 +1,29 @@
+---
+name: index
+route: /
+---
+
+import { Playground } from 'docz'
+import GitHub from './components/github'
+
+<GitHub link="{https://github.com/akira-cn/glsl-doodle}"/>
+
+# glsl Doodle
+
+这是 Fragment Shaders 的一个轻量库，可以用来作为 WebGL 学习入门，也可以用在项目中实现高性能的、有趣的图案和图形效果。
+
+---
+
+import Doodle from './components/doodle'
+
+<Playground>
+  <Doodle fragment={`
+    #ifdef GL_ES
+    precision mediump float;
+    #endif
+    
+    void main() {
+      gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
+  `}></Doodle>
+</Playground>

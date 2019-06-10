@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const path = require('path');
 
 module.exports = function (env = {}) {
@@ -54,7 +55,9 @@ module.exports = function (env = {}) {
     },
 
     plugins: [
-      // ...
+      new webpack.HotModuleReplacementPlugin({
+        multiStep: true,
+      }),
     ],
     // list of additional plugins
 

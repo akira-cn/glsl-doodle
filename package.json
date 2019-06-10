@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --env.server=examples --watch-poll",
-    "doc": "http-server docs -c-1 -p3030",
-    "build": "webpack --env.production=true && cp dist/glsl-doodle.js docs/static/js/",
+    "docz:dev": "docz dev",
+    "docz:build": "docz build",
+    "doc": "npm run docz:build && rm -rf docs/static && cp -R .docz/dist/* docs/ && http-server docs -c-1 -p3030",
+    "build": "webpack --env.production=true && cp dist/glsl-doodle.js docs/js/ && cp dist/glsl-doodle.js doc-src/js/",
     "lint": "eslint 'src/**/*.js' --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -31,6 +33,9 @@
     "webpack-dev-server": "^3.4.1"
   },
   "dependencies": {
-    "@babel/runtime": "^7.4.5"
+    "@babel/runtime": "^7.4.5",
+    "docz": "^1.2.0",
+    "docz-theme-default": "^1.2.0",
+    "docz-theme-yuque": "^1.0.2"
   }
 }
