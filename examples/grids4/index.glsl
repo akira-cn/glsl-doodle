@@ -12,8 +12,8 @@ uniform vec2 dd_randseed0;
 
 void main() {
   vec2 st = gl_FragCoord.xy / dd_resolution;
-  // st = polar(st);
-  vec2 grid = vec2(10, 10);
+  st = polar(st);
+  vec2 grid = vec2(5, 5);
   vec2 idx = grid_index(st, grid);
   st = grid_xy(st, grid);
 
