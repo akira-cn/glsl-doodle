@@ -30,7 +30,7 @@ editor.on('change', debounce(function (evt) {
   output.innerHTML = '';
   var hash = Date.now();
 
-  window.frames[0].location.href = "/sandbox.html?t=".concat(hash);
+  window.frames[0].location.href = "sandbox.html?t=".concat(hash);
 }));
 var loadingState = document.querySelector('#paper .loading');
 
@@ -83,7 +83,7 @@ var menuLinks = document.querySelectorAll('#menu a');
 function loadFile(codefile) {
   loadingState.style.display = 'block';
   loadingState.className = 'loading';
-  fetch("/static/code/".concat(codefile, ".glsl")).then(function (res) {
+  fetch("static/code/".concat(codefile, ".glsl")).then(function (res) {
     return res.text();
   }).then(function (code) {
     editor.setValue(code);
