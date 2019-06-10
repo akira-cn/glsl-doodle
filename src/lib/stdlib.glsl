@@ -63,13 +63,14 @@ highp float random(vec2 st, float a, float b) {
   return mix(a, b, p);
 }
 
-vec2 random2(vec2 st){
-  st = vec2(dot(st, vec2(127.1, 311.7)), dot(st, vec2(269.5, 183.3)));
-  return -1.0 + 2.0 * fract(sin(st) * 43758.5453123);
+highp vec2 random2(vec2 st){
+  highp vec2 v = vec2(dot(st, vec2(127.1, 311.7)), dot(st, vec2(269.5, 183.3)));
+  return -1.0 + 2.0 * fract(sin(v) * 43758.5453123);
 }
 
-vec3 random3(vec2 st) {
-  return vec3(random2(st), random(st));
+highp vec3 random3(vec2 st) {
+  highp vec3 v = vec3(random2(st), random(st));
+  return v;
 }
 
 // Value Noise by Inigo Quilez - iq/2013
