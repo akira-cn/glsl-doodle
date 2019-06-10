@@ -1,7 +1,7 @@
 {
   "name": "glsl-doodle",
   "version": "0.0.1",
-  "description": "",
+  "description": "Drawing patterns with glsl shaders on modern browsers.",
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --env.server=examples --watch-poll",
