@@ -6,9 +6,9 @@
   "scripts": {
     "start": "webpack-dev-server --env.server=examples --watch-poll",
     "docz:dev": "docz dev",
-    "docz:build": "docz build",
+    "docz:build": "cp dist/glsl-doodle.js doc-src/js/ && docz build",
     "doc": "npm run docz:build && rm -rf docs/static && cp -R .docz/dist/* docs/ && http-server docs -c-1 -p3030",
-    "build": "webpack --env.production=true && cp dist/glsl-doodle.js docs/js/ && cp dist/glsl-doodle.js doc-src/js/",
+    "build": "webpack --env.production=true && cp dist/glsl-doodle.js docs/js/",
     "lint": "eslint 'src/**/*.js' --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
