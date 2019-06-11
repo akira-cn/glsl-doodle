@@ -1,9 +1,9 @@
 {
   "vendors.js": "/static/js/vendors.cb5ac52d.js",
-  "vendors.js.map": "/static/js/vendors.54eef28a661d80dca6c8.js.map",
-  "app.js": "/static/js/app.54eef28a661d80dca6c8.js",
-  "app.js.map": "/static/js/app.54eef28a661d80dca6c8.js.map",
-  "index.js": "/static/js/index.5fe70a42.js",
-  "index.js.map": "/static/js/index.54eef28a661d80dca6c8.js.map",
+  "vendors.js.map": "/static/js/vendors.124cd0dfab336fd45481.js.map",
+  "app.js": "/static/js/app.124cd0dfab336fd45481.js",
+  "app.js.map": "/static/js/app.124cd0dfab336fd45481.js.map",
+  "index.js": "/static/js/index.1607e588.js",
+  "index.js.map": "/static/js/index.124cd0dfab336fd45481.js.map",
   "index.html": "/index.html"
 }
