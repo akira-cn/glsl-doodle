@@ -36,6 +36,7 @@
     "@babel/runtime": "^7.4.5",
     "docz": "^1.2.0",
     "docz-theme-default": "^1.2.0",
-    "docz-theme-yuque": "^1.0.2"
+    "docz-theme-yuque": "^1.0.2",
+    "gl-renderer": "^0.2.3"
   }
 }

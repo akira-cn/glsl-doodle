@@ -2,6 +2,9 @@
 precision mediump float;
 #endif
 
+#pragma texture https://p4.ssl.qhimg.com/t012170360e1552ce17.png
+#pragma texture https://p3.ssl.qhimg.com/t01a01fe1b96d05edcd.png
+
 #pragma include <stdlib>
 #pragma include <graph>
 #pragma include <color>

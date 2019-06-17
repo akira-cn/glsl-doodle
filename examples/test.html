@@ -17,11 +17,14 @@
       // await doodle.loadTextures(
       //   'https://p4.ssl.qhimg.com/t012170360e1552ce17.png'
       // );
-      await doodle.load('./index.glsl');
-      doodle.declareUniforms({
-        abc: '1iv',
-      });
-      doodle.uniforms.abc = [[1.0], [3.0]];
+
+      const program = await doodle.load('./test.glsl');
+      doodle.useProgram(program);
+
+      // doodle.declareUniforms({
+      //   abc: '1iv',
+      // });
+      // doodle.uniforms.abc = [[1.0], [3.0]];
       // doodle.uniforms['abc[0]'] = 1.0;
       // doodle.uniforms['abc[1]'] = 1.0;
 

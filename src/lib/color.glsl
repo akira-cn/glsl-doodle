@@ -39,16 +39,16 @@ vec4 rgba_color(vec3 v, float a) {
   return vec4(v, a);
 }
 
-vec4 rgb_color(int r, int g, int b) {
-  return rgba_color(r, g, b, 1.0);
+vec3 rgb_color(int r, int g, int b) {
+  return rgba_color(r, g, b, 1.0).rgb;
 }
 
-vec4 rgb_color(float r, float g, float b) {
-  return rgba_color(r, g, b, 1.0);
+vec3 rgb_color(float r, float g, float b) {
+  return rgba_color(r, g, b, 1.0).rgb;
 }
 
-vec4 rgb_color(vec3 v) {
-  return vec4(v, 1.0);
+vec3 rgb_color(vec3 v) {
+  return vec4(v, 1.0).rgb;
 }
 
 vec4 hsba_color(float h, float s, float b, float a) {
@@ -63,12 +63,12 @@ vec4 hsba_color(vec3 v, float a) {
   return vec4(hsb2rgb(v), a);
 }
 
-vec4 hsb_color(float h, float s, float b) {
-  return hsba_color(h, s, b, 1.0);
+vec3 hsb_color(float h, float s, float b) {
+  return hsba_color(h, s, b, 1.0).rgb;
 }
 
-vec4 hsb_color(vec3 v) {
-  return hsba_color(v, 1.0);
+vec3 hsb_color(vec3 v) {
+  return hsba_color(v, 1.0).rgb;
 }
 
 #ifndef RGB

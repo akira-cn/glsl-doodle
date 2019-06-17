@@ -1,9 +1,11 @@
 const webpack = require('webpack');
 const path = require('path');
+const fs = require('fs');
+const babelrc = JSON.parse(fs.readFileSync('./.babelrc'));
 
 module.exports = function (env = {}) {
   return {
-    mode: env.production ? 'production' : 'none',
+    mode: env.production ? 'production' : 'development',
     entry: './src/index',
     output: {
       path: path.resolve(__dirname, 'dist'),
@@ -20,10 +22,11 @@ module.exports = function (env = {}) {
       rules: [
         {
           test: /\.js$/,
-          exclude: /node_modules\/.*/,
+          exclude: /node_modules\/(?!gl-renderer).*/,
           use: {
             loader: 'babel-loader',
-            options: {babelrc: true},
+            options: babelrc,
+            // options: {babelrc: true},
           },
         },
         {
