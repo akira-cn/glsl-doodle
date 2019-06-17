@@ -6,7 +6,8 @@ export default class extends Component {
     const doodle = new Doodle(this.refs.doodle);
     const fragment = this.props.fragment;
     if(fragment) {
-      await doodle.compile(fragment);
+      const program = await doodle.compile(fragment);
+      doodle.useProgram(program);
     }
     doodle.render();
   }

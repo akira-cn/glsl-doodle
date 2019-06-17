@@ -4,7 +4,8 @@
 function exec(code) {
   // console.log(Doodle);
   const doodle = new Doodle(glslDoodle);
-  doodle.compile(code).then(() => {
+  doodle.compile(code).then((program) => {
+    doodle.useProgram(program);
     doodle.render();
   });
 }
