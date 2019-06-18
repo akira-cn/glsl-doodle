@@ -13,6 +13,7 @@ module.exports = function (env = {}) {
       publicPath: '/js/',
       library: ['Doodle'],
       libraryTarget: 'umd',
+      libraryExport: 'default',
     },
     // resolve: {
     //
