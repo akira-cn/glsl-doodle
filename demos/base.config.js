@@ -24,7 +24,6 @@ doodle.compile(\`${code}\`).then((program) => {
     html: {
       code: htmlCode,
       transformer: 'html',
-      visible: true,
     },
     css: {
       code: cssCode,
