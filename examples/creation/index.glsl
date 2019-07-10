@@ -2,15 +2,8 @@
 precision mediump float;
 #endif
 
-#pragma include <stdlib>
-#pragma include <graph>
-#pragma include <color>
-#pragma include <pattern>
-
 uniform float dd_time;
 uniform vec2 dd_resolution;
-uniform vec2 dd_randseed;
-uniform vec2 dd_randseed0;
 
 // http://www.pouet.net/prod.php?which=57245
 void main() {

@@ -11,6 +11,7 @@
     "build": "rm -rf dist/ && webpack --env.production=true && cp dist/glsl-doodle.js docs/js/",
     "demo:dev": "webpack --watch & cross-env NODE_ENV=development demosify --serve",
     "demo:prod": "cross-env NODE_ENV=production demosify --prod",
+    "prepublishOnly": "npm run build",
     "lint": "eslint 'src/**/*.js' --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
