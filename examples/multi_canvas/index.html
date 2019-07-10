@@ -8,10 +8,10 @@
   <script src="/js/glsl-doodle.js"></script>
 </head>
 <body>
-  <canvas class="glsl-doodle" width="512" height="512"></canvas>
-  <canvas class="glsl-doodle" width="512" height="512"></canvas>
-  <canvas class="glsl-doodle" width="512" height="512" data-fragment-for="my-shader"></canvas>
-  <script id="my-shader" type="text/x-glsl">
+  <glsl-doodle></glsl-doodle>
+  <glsl-doodle width="250" height="250"></glsl-doodle>
+  <glsl-doodle fragment-for="my-shader"></glsl-doodle>
+  <script id="my-shader" type="x-glsl/x-fragment">
     #ifdef GL_ES
     precision mediump float;
     #endif

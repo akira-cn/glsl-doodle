@@ -28,13 +28,22 @@ export default class Doodle extends GlRender {
 
   static autoLoad() {
     window.addEventListener('DOMContentLoaded', (e) => {
-      const doodleCanvas = document.querySelectorAll('canvas.glsl-doodle');
+      const doodleElement = document.querySelectorAll('glsl-doodle');
 
-      doodleCanvas.forEach(async (canvas) => {
+      doodleElement.forEach(async (el) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = el.getAttribute('width') || 512;
+        canvas.height = el.getAttribute('height') || 512;
+        if(el.createShadowRoot) {
+          const root = el.createShadowRoot();
+          root.appendChild(canvas);
+        } else {
+          el.appendChild(canvas);
+        }
         const doodle = new Doodle(canvas);
 
-        const fragmentEl = canvas.getAttribute('data-fragment-for');
-        const vertexEl = canvas.getAttribute('data-vertex-for');
+        const fragmentEl = el.getAttribute('fragment-for');
+        const vertexEl = el.getAttribute('vertex-for');
 
         let fragment = null;
         let vertex = null;
@@ -42,14 +51,14 @@ export default class Doodle extends GlRender {
         if(fragmentEl) {
           fragment = document.getElementById(fragmentEl).textContent;
         } else {
-          const fragmentURL = canvas.getAttribute('data-fragment-url') || './index.glsl';
+          const fragmentURL = el.getAttribute('fragment-url') || './index.glsl';
           fragment = await GlRender.fetchShader(fragmentURL);
         }
 
         if(vertexEl) {
           vertex = vertexEl.textContent;
         } else {
-          const vertexURL = canvas.getAttribute('data-vert-url');
+          const vertexURL = el.getAttribute('vert-url');
           if(vertexURL) vertex = await GlRender.fetchShader(vertexURL);
         }
 

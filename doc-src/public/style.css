@@ -1,0 +1,23 @@
+nav.app-nav {
+  display: inline-block;
+  width: 100%;
+  text-align: right;
+}
+
+nav.app-nav a {
+  display: inline-block;
+  line-height: 40px;
+  margin: 0 8px;
+  font-size: 20px;
+}
+
+nav.app-nav a:link,
+nav.app-nav a:visited {
+  color: #13161F;
+  text-decoration: none;
+}
+
+nav.app-nav a:hover,
+nav.app-nav a:active {
+  color: #25b864;
+}
