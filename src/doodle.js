@@ -42,7 +42,7 @@ export default class Doodle extends GlRender {
         }
         const doodle = new Doodle(canvas);
 
-        const fragmentEl = el.getAttribute('fragment-for');
+        const fragmentEl = el.getAttribute('fragment-for') || el.getAttribute('for');
         const vertexEl = el.getAttribute('vertex-for');
 
         let fragment = null;
