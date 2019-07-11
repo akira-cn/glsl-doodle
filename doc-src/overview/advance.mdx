@@ -4,4 +4,60 @@ route: /advance
 menu: 快速入门
 ---
 
-# 高级用法
+import { Playground } from 'docz'
+import GitHub from '../components/github'
+import Nav from '../components/nav';
+
+<GitHub link="https://github.com/akira-cn/glsl-doodle"/>
+
+<Nav/>
+
+import CodePen from '../components/codepen';
+
+## 使用 Doodle 类
+
+我们可以不使用 glsl-doodle 标签，而直接使用 Doodle 类，这样我们可以使用更多的功能。
+
+<CodePen codeId="YogyOQ" height="370"></CodePen>
+
+glsl-doodle 基于 [gl-renderer](https://github.com/akira-cn/gl-renderer)，Doodle 类继承 GlRenderer 类，因此可以用它的所有方法。
+
+`doodle.load()` 可以加载外部文件，它是一个异步接口，返回 program 对象。
+
+```js
+const program = await doodle.load(fragmentURL);
+```
+
+`doodle.compile()` 则直接编译字符串，由于 glsl-doodle 支持 include，所以它也是异步接口，同样返回 program 对象。
+
+```js
+const program = await doodle.compile(fragmentCode);
+```
+
+## 加载 vertex shader
+
+glsl-doodle 会自动加载默认的顶点着色器，而我们可以手工加载自己的顶点着色器：
+
+<CodePen codeId="pXYjBX" height="370"></CodePen>
+
+## 使用自定义 uniform
+
+在 shader 中声明的 uniform 变量，在 glsl-doodle 中可以通过 `doodle.uniforms.变量名` 的方式直接赋值：
+
+<CodePen codeId="JQzXGa" height="370"></CodePen>
+
+## 内建 uniform
+
+实际上 glsl-doodle 支持一系列内建的 uniform，这些 uniform 以 dd_ 开头。
+
+例如，上面的例子可以直接写成：
+
+<CodePen codeId="dBrMjx" height="370"></CodePen>
+
+其他内建 uniform 详见文档[内建属性](/buildins)。
+
+## 使用网格数据
+
+我们可以使用 setMeshData 给 doodle 传入数据，glsl-doodle 会使用当前的 program 完成渲染。
+
+<CodePen codeId="MMxyRB" height="370"></CodePen>
