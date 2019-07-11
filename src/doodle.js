@@ -51,14 +51,14 @@ export default class Doodle extends GlRender {
         if(fragmentEl) {
           fragment = document.getElementById(fragmentEl).textContent;
         } else {
-          const fragmentURL = el.getAttribute('fragment-url') || './index.glsl';
+          const fragmentURL = el.getAttribute('fragment-src') || el.getAttribute('src') || './index.glsl';
           fragment = await GlRender.fetchShader(fragmentURL);
         }
 
         if(vertexEl) {
           vertex = vertexEl.textContent;
         } else {
-          const vertexURL = el.getAttribute('vert-url');
+          const vertexURL = el.getAttribute('vert-src');
           if(vertexURL) vertex = await GlRender.fetchShader(vertexURL);
         }
 

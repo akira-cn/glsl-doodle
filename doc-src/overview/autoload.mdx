@@ -4,4 +4,35 @@ route: /autoload
 menu: 快速入门
 ---
 
+import { Playground } from 'docz'
+import GitHub from '../components/github'
+import Nav from '../components/nav';
+
+<GitHub link="https://github.com/akira-cn/glsl-doodle"/>
+
+<Nav/>
+
 # 自动加载
+
+在网页上引入glsl-doodle脚本文件：
+
+```html
+<script src="https://unpkg.com/glsl-doodle/dist/glsl-doodle.js"></script>
+```
+
+然后放置`<glsl-doodle>`标签：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>GLSL Doodle</title>
+  <script src="https://unpkg.com/glsl-doodle/dist/glsl-doodle.js"></script>
+</head>
+<body>
+  <glsl-doodle></glsl-doodle>
+</body>
+</html>
+```
