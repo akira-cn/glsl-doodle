@@ -3,7 +3,10 @@ import glsl from './glsl-lang.js';
 export default function (htmlCode, cssCode, jsCode) {
   if(global.top !== global) {
     try {
-      if(global.top.location.hostname === 'doodle.webgl.group') {
+      const hostname = global.top.location.hostname;
+      if(hostname === 'doodle.webgl.group'
+        || hostname === 'localhost'
+        || hostname === '127.0.0.1') {
         htmlCode = htmlCode.default.replace(/(width|height)="512"/img, '$1="256"');
       }
     } catch (ex) { /* empty */ }

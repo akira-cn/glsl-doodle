@@ -1,7 +1,7 @@
 module.exports = function(env) {
   return {
     devServer: {
-      port: 3000,
+      port: 3030,
     },
     output: {
       dir: 'docs/demo',

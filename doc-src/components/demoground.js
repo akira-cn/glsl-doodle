@@ -4,11 +4,12 @@ export default class extends Component {
   render() {
     const iframeStyle = {
       width: '100%',
-      height: '370px',
+      height: '420px',
       border: 'none',
     };
+    const source = `/demo/#/${this.props.demoId}`;
     return (
-      <iframe src="http://doodle.webgl.group/demo/#/coord2"
+      <iframe src={source}
         scrolling="yes"
         style={iframeStyle}
       ></iframe>
