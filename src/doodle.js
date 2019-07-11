@@ -53,6 +53,13 @@ export default class Doodle extends GlRender {
         } else {
           const fragmentURL = el.getAttribute('fragment-src') || el.getAttribute('src') || './index.glsl';
           fragment = await GlRender.fetchShader(fragmentURL);
+          if(/\.js$/.test(fragmentURL)) {
+            // eslint-disable-next-line no-new-func
+            const process = new Function('shader', fragment);
+            process((strings) => {
+              fragment = strings.join('');
+            });
+          }
         }
 
         if(vertexEl) {
