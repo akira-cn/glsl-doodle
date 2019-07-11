@@ -1,6 +1,6 @@
 ---
-name: 自动加载
-route: /autoload
+name: 基本用法
+route: /getting_start
 menu: 快速入门
 ---
 
@@ -12,7 +12,27 @@ import Nav from '../components/nav';
 
 <Nav/>
 
-# 自动加载
+## 安装
+
+通过CDN直接使用：
+
+```html
+<script src="https://unpkg.com/glsl-doodle/dist/glsl-doodle.js"></script>
+```
+
+通过NPM安装
+
+```bash
+npm i glsl-doodle --save
+```
+
+通过Yarn安装
+
+```bash
+yarn add glsl-doodle --save
+```
+
+## 内嵌代码
 
 在网页上引入glsl-doodle脚本文件：
 
@@ -84,7 +104,7 @@ import CodePen from '../components/codepen';
 
 ## 引入外部脚本
 
-glsl-doodle 支持外链资源，外部资源可以使用 glsl 文本，也可以使用 js。
+glsl-doodle 支持外链加载资源：
 
 ```html
 <!DOCTYPE html>
@@ -102,3 +122,6 @@ glsl-doodle 支持外链资源，外部资源可以使用 glsl 文本，也可�
 ```
 
 <CodePen codeId="wLOava" height="370"></CodePen>
+
+
+💡 **如果既没有设置 for 属性，也没有设置 src 属性，glsl-doodle 会默认加载当前路径下的 `index.glsl` 文件。**

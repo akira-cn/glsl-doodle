@@ -18,8 +18,9 @@ export default class extends Component {
       margin: '1em 0',
       padding: '1em',
     };
+    const containerStyle = {marginBottom: 20};
     return (
-      <div className="codepen-container" ref="codepen">
+      <div className="codepen-container" ref="codepen" style={containerStyle}>
         <p className="codepen"
           data-height={this.props.height}
           data-theme-id={this.props.theme || 'dark'}
