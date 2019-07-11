@@ -12,7 +12,7 @@ module.exports = function(env) {
     demoList: env === 'development' ? '.demoList.dev.json': '.demoList.prod.json',
     name: 'DOODLE',
     version: 'v1',
-    homePage: 'http://doodle.webgl.group/',
+    homePage: global.top == null || global.top === global ? 'http://doodle.webgl.group/' : location.href,
     logo: '',
     // 可选主题: active4d, allHallowsEve, amy, blackboard, brillianceBlack,
     // brillianceDull, chromeDevtools, cloudsMidnight, clouds, cobalt,

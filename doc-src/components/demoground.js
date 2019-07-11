@@ -4,7 +4,7 @@ export default class extends Component {
   render() {
     const iframeStyle = {
       width: '100%',
-      height: '700px',
+      height: '370px',
       border: 'none',
     };
     return (
