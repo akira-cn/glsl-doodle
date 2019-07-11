@@ -29,7 +29,7 @@ import Nav from '../components/nav';
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
   <title>GLSL Doodle</title>
-  <script src="https://unpkg.com/glsl-doodle/dist/glsl-doodle.js"></script>
+  <script src="https://unpkg.com/glsl-doodle@0.1.2/dist/glsl-doodle.js"></script>
 </head>
 <body>
   <glsl-doodle for="myshader"></glsl-doodle>
@@ -39,6 +39,8 @@ import Nav from '../components/nav';
   #endif
 
   #pragma include <graphics>
+  #pragma include <pattern>
+  #pragma include <color>
 
   uniform vec2 dd_resolution;
 
@@ -61,8 +63,42 @@ import Nav from '../components/nav';
       }
       color(d3, vec3(0.376, 0.337, 0.619));
     }
-  }  
+  }    
   </script>
 </body>
 </html>
 ```
+
+glsl-doodle 标签可以设置 for 属性，指向存放 fragment shader 代码的元素。
+
+```html
+<glsl-doodle for="myshader"></glsl-doodle>
+<script id="myshader" type="x-shader/x-fragment">
+...
+</script>
+```
+
+import CodePen from '../components/codepen';
+
+<CodePen codeId="YogzmE" height="396"></CodePen>
+
+## 引入外部脚本
+
+glsl-doodle 支持外链资源，外部资源可以使用 glsl 文本，也可以使用 js。
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>GLSL Doodle</title>
+  <script src="https://unpkg.com/glsl-doodle/dist/glsl-doodle.js"></script>
+</head>
+<body>
+  <glsl-doodle width="256" height="256" src="https://raw.githubusercontent.com/akira-cn/glsl-doodle/master/demos/preview/grids/index.glsl"></glsl-doodle>
+</body>
+</html>
+```
+
+<CodePen codeId="wLOava" height="370"></CodePen>

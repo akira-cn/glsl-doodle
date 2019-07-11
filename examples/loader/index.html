@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>GLSL Doodle</title>
+  <script src="/js/glsl-doodle.js"></script>
+</head>
+<body>
+  <glsl-doodle for="myshader"></glsl-doodle>
+  <script id="myshader" type="x-shader/x-fragment">
+  #ifdef GL_ES
+  precision mediump float;
+  #endif
+
+  #pragma include <graphics>
+  #pragma include <pattern>
+  #pragma include <color>
+
+  uniform vec2 dd_resolution;
+
+  void main() {
+    vec2 st =  gl_FragCoord.xy / dd_resolution.xy;
+    float d = sdf_circle(st, vec2(0.5), 0.5);
+    d = fill(d);
+    if(d > 0.0) {
+      vec2 grid = vec2(4.0, 4.0);
+      vec2 overlaps[4]; 
+      grid_overlap(st, grid, overlaps);
+      float d3 = 0.0;
+      for(int i = 0; i < 4; i++) {
+        vec2 st2 = overlaps[i];
+        st2 *= 0.6;
+        // st2 = skew(st2, vec2(0), vec2(1.0, 0.0));
+        st2 = rotate(st2, vec2(0.0), - PI / 3.0);
+        float d2 = shape_hypocycloid(st2, vec2(0), 4);
+        d3 = udf_union(d3, d2);
+      }
+      color(d3, vec3(0.376, 0.337, 0.619));
+    }
+  }  
+  </script>
+</body>
+</html>

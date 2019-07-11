@@ -34,12 +34,15 @@ export default class Doodle extends GlRender {
         const canvas = document.createElement('canvas');
         canvas.width = el.getAttribute('width') || 512;
         canvas.height = el.getAttribute('height') || 512;
-        if(el.createShadowRoot) {
-          const root = el.createShadowRoot();
-          root.appendChild(canvas);
-        } else {
-          el.appendChild(canvas);
+
+        let root = el;
+        if(el.attachShadow) {
+          root = el.attachShadow({mode: 'open'});
+        } else if(el.createShadowRoot) {
+          root = el.createShadowRoot();
         }
+        root.appendChild(canvas);
+
         const doodle = new Doodle(canvas);
 
         const fragmentEl = el.getAttribute('fragment-for') || el.getAttribute('for');
