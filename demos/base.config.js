@@ -1,6 +1,13 @@
 import glsl from './glsl-lang.js';
 
 export default function (htmlCode, cssCode, jsCode) {
+  if(global.top !== global) {
+    try {
+      if(global.top.location.hostname === 'doodle.webgl.group') {
+        htmlCode = htmlCode.default.replace(/(width|height)="512"/img, '$1="256"');
+      }
+    } catch (ex) { /* empty */ }
+  }
   return {
     javascript: {
       code: jsCode,
