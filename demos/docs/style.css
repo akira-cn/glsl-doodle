@@ -1,0 +1,10 @@
+body {
+  display: flex;
+}
+
+glsl-doodle {
+  display: inline-block;
+  background: #fff;
+  font-size: 0;
+  margin: auto;
+}

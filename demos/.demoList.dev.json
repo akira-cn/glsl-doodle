@@ -104,5 +104,26 @@
   }, {
     "label": "preview creation",
     "src": "preview/creation"
+  }, {
+    "label": "docs doodle",
+    "src": "docs/doodle"
+  }, {
+    "label": "docs doodle link",
+    "src": "docs/doodle-link"
+  }, {
+    "label": "docs doodle script",
+    "src": "docs/doodle-obj"
+  }, {
+    "label": "docs add vertex",
+    "src": "docs/vertex"
+  }, {
+    "label": "docs set uniforms",
+    "src": "docs/uniforms"
+  }, {
+    "label": "docs buildin uniforms",
+    "src": "docs/buildin-uniforms"
+  }, {
+    "label": "docs mesh data",
+    "src": "docs/meshdata"
   }
 ]

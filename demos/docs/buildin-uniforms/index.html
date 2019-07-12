@@ -1,0 +1,12 @@
+<glsl-doodle for="myDoodle" width="256" height="256"></glsl-doodle>
+<script id="myDoodle" type="x-shader/x-fragment">
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+uniform float dd_frameIndex;
+
+void main() {
+  gl_FragColor = (0.5 + 0.5 * sin(0.05 * dd_frameIndex)) * vec4(1, 0, 0, 1);
+}
+</script>
