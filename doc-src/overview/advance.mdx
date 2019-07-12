@@ -12,13 +12,13 @@ import Nav from '../components/nav';
 
 <Nav/>
 
-import CodePen from '../components/codepen';
-
 ## 使用 Doodle 类
 
 我们可以不使用 glsl-doodle 标签，而直接使用 Doodle 类，这样我们可以使用更多的功能。
 
-<CodePen codeId="YogyOQ" height="370"></CodePen>
+import DemoGround from '../components/demoground';
+
+<DemoGround demoId="docs/doodle-obj" height="370"></DemoGround>
 
 glsl-doodle 基于 [gl-renderer](https://github.com/akira-cn/gl-renderer)，Doodle 类继承 GlRenderer 类，因此可以用它的所有方法。
 
@@ -38,13 +38,13 @@ const program = await doodle.compile(fragmentCode);
 
 glsl-doodle 会自动加载默认的顶点着色器，而我们可以手工加载自己的顶点着色器：
 
-<CodePen codeId="pXYjBX" height="370"></CodePen>
+<DemoGround demoId="docs/vertex" height="370"></DemoGround>
 
 ## 使用自定义 uniform
 
 在 shader 中声明的 uniform 变量，在 glsl-doodle 中可以通过 `doodle.uniforms.变量名` 的方式直接赋值：
 
-<CodePen codeId="JQzXGa" height="370"></CodePen>
+<DemoGround demoId="docs/uniforms" height="370"></DemoGround>
 
 ## 内建 uniform
 
@@ -52,7 +52,7 @@ glsl-doodle 会自动加载默认的顶点着色器，而我们可以手工加�
 
 例如，上面的例子可以直接写成：
 
-<CodePen codeId="dBrMjx" height="370"></CodePen>
+<DemoGround demoId="docs/buildin-uniforms" height="370"></DemoGround>
 
 其他内建 uniform 详见文档[内建属性](/buildins)。
 
@@ -60,4 +60,4 @@ glsl-doodle 会自动加载默认的顶点着色器，而我们可以手工加�
 
 我们可以使用 setMeshData 给 doodle 传入数据，glsl-doodle 会使用当前的 program 完成渲染。
 
-<CodePen codeId="MMxyRB" height="370"></CodePen>
+<DemoGround demoId="docs/meshdata" height="370"></DemoGround>

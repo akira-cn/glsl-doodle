@@ -4,8 +4,9 @@ export default class extends Component {
   render() {
     const iframeStyle = {
       width: '100%',
-      height: '420px',
+      height: `${this.props.height || 420}px`,
       border: 'none',
+      margin: '10px 0',
     };
     const source = `//doodle.webgl.group/demo/#/${this.props.demoId}`;
     return (
