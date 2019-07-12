@@ -7,7 +7,7 @@ export default class extends Component {
       height: '420px',
       border: 'none',
     };
-    const source = `/demo/#/${this.props.demoId}`;
+    const source = `//doodle.webgl.group/demo/#/${this.props.demoId}`;
     return (
       <iframe src={source}
         scrolling="yes"

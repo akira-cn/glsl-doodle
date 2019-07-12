@@ -10,4 +10,6 @@ canvas {
   margin: auto;
   border: solid 2px #aaa;
   background: #fff;
+  max-width: 512px;
+  width: 80%;
 }
