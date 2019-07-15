@@ -3,6 +3,7 @@ precision mediump float;
 #endif
 
 uniform vec2 dd_resolution;
+uniform float dd_time;
 
 // http://www.pouet.net/prod.php?which=57245
 void main() {

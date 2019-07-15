@@ -16,9 +16,13 @@ import DemoGround from '../components/demoground';
 
 glsl-doodle 提供了一些内建变量和模块方法，在这里我们一一介绍并举例说明一下。
 
-### stdlib 模块
+## stdlib 模块
 
-| 方法名 | 介绍 |
+stdlib模块提供一些辅助数学函数以及random、noise。
+
+---
+
+| 方法 | 介绍 |
 | --- | --- |
 | float atan2(float, float) | 获得值域在 0~2PI 之间的反正切值 |
 | float atan2(vec2) | |
@@ -33,4 +37,47 @@ glsl-doodle 提供了一些内建变量和模块方法，在这里我们一一�
 
 例：伪随机
 
-<DemoGround demoId="docs/random" height="370"></DemoGround>
+<DemoGround demoId="docs/random" height="396"></DemoGround>
+
+## graphics 模块
+
+graphics模块提供丰富的内建绘图方法，可以绘制各种曲线和矢量图形。
+
+#### 1. 距离场函数
+
+距离场函数返回由向量和几何图形计算出的**有向距离场**，glsl-doodle 根据距离场绘图，基本原理见[The Book of Shaders 形状](https://thebookofshaders.com/07/?lan=ch)
+
+---
+
+| 方法 | 介绍 |
+| --- | --- |
+| SDF sdf_line(vec2 st, vec2 v) | 得到由向量v确定的直线的有向距离场 |
+| SDF sdf_line(vec2 st, vec2 v1, vec2 v2) | 得到由向量v1, v2确定的直线的有向距离场 |
+| SDF sdf_seg(vec2 st, vec2 v) | 得到由原点到向量v的线段的有向距离场 |
+| SDF sdf_seg(vec2 st, vec2 v1, vec2 v2) | 得到从向量v1到向量v2的线段的有向距离场 |
+| SDF sdf_triangle(vec2 st, vec2 a, vec2 b, vec2 c) | 得到顶点为a,b,c的三角形的有向距离场 |
+| SDF sdf_rect(vec2 st, vec2 p, float w, float h) | 得到左下角p，宽高为w,h的矩形的有向距离场 |
+| SDF sdf_circle(vec2 st, vec2 c, float r) | 得到圆心c，半径r的圆的有向距离场 |
+| SDF sdf_ellipse(vec2 st, vec2 c, float a, float b) | 得到中心c，长轴a，短轴b的椭圆的有向距离场 |
+| SDF sdf_ellipse(vec2 st, vec2 c, float a, float b, float sAng, float eAng) | 得到中心c，长轴a，短轴b，起始角度sAng，结束角度eAng的椭圆弧的有向距离场 |
+| SDF sdf_arc(vec2 st, vec2 c, float r, float sAng, float eAng) | 得到中心c，半径r，起始角度sAng，结束角度eAng的圆弧的有向距离场 |
+| SDF sdf_rhombus(vec2 st, vec2 cr, float w, float h) | 得到中心cr，宽w，高h的菱形的有向距离场 |
+| SDF regular_polygon(vec2 st, vec2 center, float r, float rotation, const int edges, bool hypocycloid) | 得到中心点center，半径r，旋转角度rotation，边数，是否使用内摆线的正多边形有向距离场 |
+| SDF regular_polygon(vec2 st, vec2 center, float r, const int edges) | 得到中心点center，半径r，边数edges的正多边形 |
+
+图形的有向距离场数据，通过stroke和fill函数将它转为单位距离场UDF，然后通过混合颜色数据输出到画布上。
+
+---
+
+| 方法 | 介绍 |
+| --- | --- |
+| UDF stroke(SDF d, float d0, float w, float smth) | 将有向距离场等于d0附近宽度为w的区域转为UDF，smth是消锯齿的百分比 |
+| UDF stroke(SDF d, float w, float smth) | 将有向距离场等于0附近宽度为w的区域转为UDF，smth是消锯齿的百分比 |
+| UDF stroke(SDF d, float w) | 将有向距离场等于0附近宽度为w的区域转为UDF |
+| UDF fill(SDF d, float start, float end, float smth)  | 将有向距离场start到end区间的区域转为UDF，smth是两侧消锯齿百分比 |
+| UDF fill(SDF d, float start, float smth) | 将有向距离场start到1区间的区域转为UDF，smth是两侧消锯齿百分比 |
+| UDF fill(SDF d, float smth) | 将有向距离场0到1区间的区域转为UDF，smth是两侧消锯齿百分比 |
+| UDF fill(SDF d) | 将有向距离场0到1区间的区域转为UDF，不消锯齿 |
+
+例：用sdf_triangle和fill绘制三角形
+

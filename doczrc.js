@@ -29,5 +29,14 @@ export default {
         '事件',
       ],
     },
+    {
+      name: '🔗 相关资源',
+      menu: [
+        {name: 'The Book of Shaders', href: 'https://thebookofshaders.com/'},
+        {name: 'GL renderer', href: 'https://github.com/akira-cn/gl-renderer'},
+        {name: 'Docz', href: 'https://www.docz.site/'},
+        {name: 'Demosify', href: 'https:/www.demosify.com/'},
+      ],
+    },
   ],
 };
