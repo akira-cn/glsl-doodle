@@ -1,5 +1,5 @@
 ---
-name: 内建属性
+name: 内建模块
 route: /buildins
 menu: 详细文档
 ---
@@ -125,3 +125,75 @@ graphics模块提供丰富的内建绘图方法，可以绘制各种曲线和矢
 | UDF udf_complement(UDF d1, UDF d2)  | 绘制两个UDF的补集部分 |
 
 <DemoGround demoId="docs/udf_complement" height="396"></DemoGround>
+
+## transform 模块
+
+这是用来方便做平移、旋转、缩放等矩阵运算的模块。
+
+---
+
+| 方法 | 介绍 |
+| --- | --- |
+| vec2 transform(vec2 v0, mat3 matrix)  | 向量v0与三维矩阵做一个 transform |
+| vec2 translate(vec2 v0, vec2 xy) | 向量v0平移xy |
+| vec2 translate(vec2 v0, vec2 xy) | 向量v0平移xy |
+| vec2 scale(vec2 v0, vec2 origin, vec2 scale) | 向量v0以origin为中心缩放 |
+| vec2 scale(vec2 v0, vec2 scaleXY) | 向量v0以坐标原点为中心缩放 |
+| vec2 rotate(vec2 v0, vec2 origin, float ang) | 向量v0以origin为中心旋转ang角度 |
+| vec2 rotate(vec2 v0, float ang) | 向量v0以坐标原点为中心旋转ang角度 |
+| vec2 skew(vec2 v0, vec2 origin, vec2 skew) | 向量v0以origin为中心扭曲 |
+| vec2 skew(vec2 v0, vec2 skewXY) | 向量v0以坐标原点为中心扭曲 |
+
+例：旋转
+
+<DemoGround demoId="docs/rotation" height="396"></DemoGround>
+
+## pattern 模块
+
+pattern模块创造网格用来绘制重复图案。基本原理见[The Book of Shaders 图案](https://thebookofshaders.com/09/?lan=ch)。
+
+---
+
+| 方法 | 介绍 |
+| --- | --- |
+| vec2 grid_xy(vec2 st, vec2 grid) | 创建不重叠的格子，每个格子坐标范围 0.0 ~ 1.0 |
+| void grid_overlap(vec2 st, vec2 grid, inout vec2 overlap[4]) | 创建重叠的格子，每个格子返回坐标范围 -1.0 ~ 1.0 |
+| vec2 grid_index(vec2 st, vec2 grid) | 获取当前坐标所在网格的编号 |
+| bool grid_odd(vec2 idx, vec2 grid) | 判断当前坐标是否属于第奇数个网格 |
+| bool grid_even(vec2 idx, vec2 grid) | 判断当前坐标是否属于第偶数个网格 |
+| bool grid_odd_row(vec2 idx, vec2 grid) | 判断当前坐标是否属于第奇数行 |
+| bool grid_even_row(vec2 idx, vec2 grid) | 判断当前坐标是否属于第偶数行 |
+| bool grid_odd_col(vec2 idx, vec2 grid)  | 判断当前坐标是否属于第奇数列 |
+| bool grid_even_col(vec2 idx, vec2 grid)  | 判断当前坐标是否属于第偶数列 |
+| float mist(vec2 st) | 产生云雾效果 |
+| float juila_set(vec2 st, vec2 center, float dist, vec2 c, float scale) | juila 分形集合 |
+
+例：网格图案
+
+<DemoGround demoId="preview/random" height="396"></DemoGround>
+
+
+例：云雾
+
+<DemoGround demoId="preview/mist" height="396"></DemoGround>
+
+## color 模块
+
+color模块可以处理RGB和HSB颜色。
+
+---
+
+| 方法 | 介绍 |
+| --- | --- |
+| vec3 RGB(float r, float g, float b) | 以0~1表示的RGB色值 |
+| vec3 RGB(int r, int g, int b) | 以0~255表示的RGB色值 |
+| vec4 RGBA(float r, float g, float b, float a) | 以0~1表示的RGBA色值 |
+| vec4 RGBA(int r, int g, int b, float a) | 以0~255表示的RGBA色值 |
+| vec3 HSB(float r, float g, float b) | 将以0~1表示的HSB色值转换为对应的RGB色值 |
+| vec3 HSB(int r, int g, int b) | 将以0~255表示的HSB色值转换为对应的RGB色值 |
+| vec3 HSBA(float r, float g, float b, float a) | 将以0~1表示的HSBA色值转换为对应的RGBA色值 |
+| vec3 HSBA(int r, int g, int b, float a) | 将以0~255表示的HSBA色值转换为对应的RGBA色值 |
+
+例：HSB颜色
+
+<DemoGround demoId="docs/hsb_color" height="396"></DemoGround>

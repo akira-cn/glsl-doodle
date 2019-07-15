@@ -134,5 +134,11 @@
   }, {
     "label": "docs udf_complement",
     "src": "docs/udf_complement"
+  }, {
+    "label": "docs rotation",
+    "src": "docs/rotation"
+  }, {
+    "label": "docs hsb_color",
+    "src": "docs/hsb_color"
   }
 ]
