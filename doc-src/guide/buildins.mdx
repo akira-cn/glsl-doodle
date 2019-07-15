@@ -84,3 +84,44 @@ graphics模块提供丰富的内建绘图方法，可以绘制各种曲线和矢
 <DemoGround demoId="docs/sdf_triangle" height="396"></DemoGround>
 
 更多绘图例子详见[基础图形](/shape)。
+
+#### 2. 图形函数
+
+除了基础的基于距离场的绘图之外，graphics 还提供一系列图形函数。这些图形函数利用直角坐标系与极坐标系绘制有趣的图形。
+
+---
+
+| 方法 | 介绍 |
+| --- | --- |
+| UDF shape_blade(vec2 st, vec2 center, float num) | 以center为中心，绘制num个叶子 |
+| UDF shape_infinity(vec2 st, vec2 center) | 以center为中心，绘制“无穷大”图形 |
+| UDF shape_clover(vec2 st, vec2 center, float num) | 以center为中心，绘制num个花瓣 |
+| UDF shape_flower(vec2 st, vec2 center, float num) | 以center为中心，绘制num个花瓣 |
+| UDF shape_gourd(vec2 st, vec2 center)  | 以center为中心，绘制葫芦图形 |
+| UDF shape_apple(vec2 st, vec2 center) | 以center为中心，绘制苹果 |
+| UDF shape_bud(vec2 st, vec2 center, float num)  | 以center为中心，绘制num瓣花苞 |
+| UDF shape_star(vec2 st, vec2 center) | 以center为中心，绘制五角星 |
+| UDF shape_regular_polygon(vec2 st, vec2 center, const int edges) | 以center为中心，绘制edges条边的正多边形 |
+| UDF shape_triangle(vec2 st, vec2 center) | 以center为中心，绘制正三角形 |
+| UDF shape_rhombus(vec2 st, vec2 center) | 以center为中心，绘制菱形 |
+| UDF shape_pentagon(vec2 st, vec2 center) | 以center为中心，绘制正五边形 |
+| UDF shape_hexagon(vec2 st, vec2 center) | 以center为中心，绘制正六边形 |
+| UDF shape_heptagon(vec2 st, vec2 center) | 以center为中心，绘制正七边形 |
+| UDF shape_octagon(vec2 st, vec2 center) | 以center为中心，绘制正八边形 |
+| UDF shape_hypocycloid(vec2 st, vec2 center, const int edges) | 以center为中心，绘制edges条边的内摆线正多边形 |
+| UDF shape_cross(vec2 st, vec2 center) | 以center为中心，绘制十字 |
+
+例：绘制随机图形
+
+<DemoGround demoId="preview/shapes" height="396"></DemoGround>
+
+3. 其他函数
+
+| 方法 | 介绍 |
+| --- | --- |
+| PLOT(f, st, step) | 这是一个宏，用来绘制连续曲线 |
+| UDF udf_intersect(UDF d1, UDF d2) | 绘制两个UDF的交集部分 |
+| UDF udf_union(UDF d1, UDF d2)  | 绘制两个UDF的并集部分 |
+| UDF udf_complement(UDF d1, UDF d2)  | 绘制两个UDF的补集部分 |
+
+<DemoGround demoId="docs/udf_complement" height="396"></DemoGround>
