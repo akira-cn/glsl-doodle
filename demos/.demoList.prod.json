@@ -125,5 +125,8 @@
   }, {
     "label": "docs mesh data",
     "src": "docs/meshdata"
+  }, {
+    "label": "docs random",
+    "src": "docs/random"
   }
 ]
