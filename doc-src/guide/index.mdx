@@ -4,4 +4,67 @@ route: /guide
 menu: 详细文档
 ---
 
-# 介绍
+import GitHub from '../components/github'
+import Nav from '../components/nav';
+import DemoGround from '../components/demoground';
+
+<GitHub link="https://github.com/akira-cn/glsl-doodle"/>
+
+<Nav/>
+
+## 简介
+
+glsl-doodle 是一个简单的使用 Fragement Shader 绘制 WebGL 图案的图形库。适合 WebGL 入门学习使用，也可以用来在项目中绘制高性能、有趣的 WebGL 图案的图形库。
+
+glsl-doodle 引入非常简单，它本身是一个 gzip 大小为 17kb 的独立的 JS 库，所以你可以使用 CDN 将它引入到页面中：
+
+```html
+<script src="https://unpkg.com/glsl-doodle/dist/glsl-doodle.js"></script>
+```
+
+当然如果你想在其他库中使用 glsl-doodle，你也可以使用NPM或Yarn安装，安装后可以使用模块引入的方式使用：
+
+```js
+import Doodle from 'glsl-doodle';
+```
+
+glsl-doodle 本身的使用方法，在前面的[快速入门](http://doodle.webgl.group/advance)里已经介绍过了，在这里不再重复介绍。
+
+## 扩展 Shader
+
+glsl-doodle 对 shader 语法进行了扩展，提供了类似 C 语言的模块引入机制，所以你可以这么写：
+
+```glsl
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+#pragma include "./my_module.glsl";
+
+void main() {
+  ...
+}
+```
+
+`#pragma include` 相当于 C 语言中的 `#include`，浏览器会自动加载 `./my_module.glsl` 模块。
+
+glsl-doodle 提供了一些系统内置的模块，这些库可以直接使用`<模块名>`加载，而且不需要使用文件扩展名`.glsl`，如：
+
+```glsl
+#pragma include <stdlib>
+```
+
+glsl-doodle 提供的内置库如下：
+
+---
+
+| 库名 | 说明 |
+| --- | --- |
+| stdlib | 标准库，提供一些辅助数学函数和random、noise函数 |
+| graphics | 图形库，提供基础的图形绘制功能，graphics 自动加载 stdlib、shaper、transform 这几个库 |
+| shaper | 塑形函数扩展库，主要提供 quadratic_bezier 和 cubic_bezier 两个塑形函数 |
+| transform | 计算向量和 box 的 transform 的库 |
+| pattern | 创建重复的格子，和一些图案特效 |
+| color | 处理 RGB 和 HSL 颜色 |
+
+这些库提供的具体函数详见[内建属性](http://127.0.0.1:3000/buildins)。

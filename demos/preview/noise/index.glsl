@@ -2,8 +2,7 @@
 precision mediump float;
 #endif
 
-#pragma include <stdlib>
-#pragma include <graph>
+#pragma include <graphics>
 #pragma include <color>
 #pragma include <pattern>
 

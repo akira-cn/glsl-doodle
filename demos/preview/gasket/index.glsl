@@ -2,13 +2,11 @@
 precision mediump float;
 #endif
 
-#pragma include <stdlib>
-#pragma include <graph>
+#pragma include <graphics>
 #pragma include <color>
 #pragma include <pattern>
 
 uniform vec2 dd_resolution;
-uniform vec2 dd_randseed0;
 
 SDF gasket(in vec2 st, in vec2 a, in vec2 b, in vec2 c) {
   const int count = 5;

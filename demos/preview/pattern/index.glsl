@@ -2,17 +2,11 @@
 precision mediump float;
 #endif
 
-#pragma include <stdlib>
-#pragma include <graph>
+#pragma include <graphics>
 #pragma include <color>
 #pragma include <pattern>
 
-uniform vec2 dd_randseed0;
 uniform vec2 dd_resolution;
-
-uniform sampler2D dd_sampler0;
-
-varying vec2 vTextureCoord;
 
 void main() {
   vec2 st =  gl_FragCoord.xy / dd_resolution.xy;
