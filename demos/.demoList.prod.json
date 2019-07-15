@@ -128,5 +128,8 @@
   }, {
     "label": "docs random",
     "src": "docs/random"
+  }, {
+    "label": "docs sdf_triangle",
+    "src": "docs/sdf_triangle"
   }
 ]
