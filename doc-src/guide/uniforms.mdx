@@ -1,0 +1,43 @@
+---
+name: 内建 uniforms
+route: /uniforms
+menu: 详细文档
+---
+
+import GitHub from '../components/github'
+import Nav from '../components/nav';
+import DemoGround from '../components/demoground';
+
+<GitHub link="https://github.com/akira-cn/glsl-doodle"/>
+
+<Nav/>
+
+
+## 内建 uniforms
+
+除了内建模块，glsl-doodle还提供了一组以dd_前缀开头的内建uniforms，我们之前已经见过的dd_resolution和dd_time就属于内建uniforms。
+
+让我们来详细看一下：
+
+---
+
+| uniform | 说明 |
+| --- | --- |
+| uniform vec2 dd_resolution | 画布分辨率，比如画布大小200x200，那么dd_resolution的值就是vec2(200, 200) |
+| uniform float dd_time | 渲染每一帧时的时间戳，方便用来实现动画 |
+| uniform float dd_frameIndex | 当前渲染帧的序号，从1开始，每渲染一次增加1 |
+| uniform float dd_randseed | 随机种子，每次渲染都会随机生成一个，第一帧渲染时dd_randseed等于dd_randseed0 |
+| uniform float dd_randseed0 | 随机种子，第一帧渲染时生成 |
+| uniform int dd_mouseEvent | 鼠标事件，当鼠标被按下时，下一帧dd_mouseEvent值为1，当鼠标被松开时，下一帧dd_mouseEvent值为2，当鼠标滚轮滚动时，下一帧dd_mouseEvent值为3，其余情况下dd_mouseEvent值为0 |
+| uniform vec2 dd_mousePosition | 鼠标移动时，传入鼠标的归一化坐标，否则值为vec2(-1) |
+| uniform int dd_mouseButtons | 1-左键，2-右键，4-中键 |
+| uniform int dd_keyEvent | 键盘按下时，下一帧dd_keyEvent值为1，键盘松开时，下一帧dd_keyEvent值为2，其余情况值为0 |
+| uniform int dd_keyCode | 键盘按下状态，dd_keyCode为实际键码，否则为0 |
+| unifrom int dd_touchEvent | touch事件，touchstart时，下一帧该值为1，touchend时，下一帧该值为2，touchmove时，下一帧该值为3，其余情况该值为0 |
+| uniform vec2 dd_touchPosition | 触屏时，传入鼠标的归一化坐标，否则值为vec2(-1) |
+
+通过这些内建uniforms，我们可以很容易地实现动画、处理事件等等。
+
+例：鼠标事件
+
+<DemoGround demoId="docs/mouse" height="396"></DemoGround>

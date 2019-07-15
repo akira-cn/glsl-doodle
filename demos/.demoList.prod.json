@@ -140,5 +140,8 @@
   }, {
     "label": "docs hsb_color",
     "src": "docs/hsb_color"
+  }, {
+    "label": "docs mouse",
+    "src": "docs/mouse"
   }
 ]

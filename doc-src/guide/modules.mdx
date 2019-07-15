@@ -1,0 +1,199 @@
+---
+name: 内建模块
+route: /modules
+menu: 详细文档
+---
+
+import GitHub from '../components/github'
+import Nav from '../components/nav';
+import DemoGround from '../components/demoground';
+
+<GitHub link="https://github.com/akira-cn/glsl-doodle"/>
+
+<Nav/>
+
+## 内建模块
+
+glsl-doodle 提供了一些有用的内建模块，在这里我们一一介绍并举例说明一下。
+
+## stdlib 模块
+
+stdlib模块提供一些辅助数学函数以及random、noise。
+
+---
+
+| 方法 | 介绍 |
+| --- | --- |
+| float atan2(float, float) | 获得值域在 0~2PI 之间的反正切值 |
+| float atan2(vec2) | |
+| float angle(vec2, vec2 = vec2(1, 0)) | 从 v1 到 v2 的逆时针夹角, 值域在0~2PI |
+| vec2 center(vec2, vec2 = vec2(0)) | 向量 v1 + v2 的中心点 |
+| float random(vec2) | 得到伪随机数 |
+| float random(vec2, float a, float b) | 得到a,b之间的伪随机数 |
+| vec2 random2(vec2) | 得到伪随向量 |
+| vec3 random2(vec2) | 得到伪随向量 |
+| float noise(vec2) | 得到伪随机的噪声 |
+| polar(vec2, vec2 = vec2(0.5)) | 围绕某中心点将直角坐标转换为极坐标 |
+
+例：伪随机
+
+<DemoGround demoId="docs/random" height="396"></DemoGround>
+
+## graphics 模块
+
+graphics模块提供丰富的内建绘图方法，可以绘制各种曲线和矢量图形。
+
+#### 1. 距离场函数
+
+距离场函数返回由向量和几何图形计算出的**有向距离场**，glsl-doodle 根据距离场绘图，基本原理见[The Book of Shaders 形状](https://thebookofshaders.com/07/?lan=ch)
+
+---
+
+| 方法 | 介绍 |
+| --- | --- |
+| SDF sdf_line(vec2 st, vec2 v) | 得到由向量v确定的直线的有向距离场 |
+| SDF sdf_line(vec2 st, vec2 v1, vec2 v2) | 得到由向量v1, v2确定的直线的有向距离场 |
+| SDF sdf_seg(vec2 st, vec2 v) | 得到由原点到向量v的线段的有向距离场 |
+| SDF sdf_seg(vec2 st, vec2 v1, vec2 v2) | 得到从向量v1到向量v2的线段的有向距离场 |
+| SDF sdf_triangle(vec2 st, vec2 a, vec2 b, vec2 c) | 得到顶点为a,b,c的三角形的有向距离场 |
+| SDF sdf_rect(vec2 st, vec2 p, float w, float h) | 得到左下角p，宽高为w,h的矩形的有向距离场 |
+| SDF sdf_circle(vec2 st, vec2 c, float r) | 得到圆心c，半径r的圆的有向距离场 |
+| SDF sdf_ellipse(vec2 st, vec2 c, float a, float b) | 得到中心c，长轴a，短轴b的椭圆的有向距离场 |
+| SDF sdf_ellipse(vec2 st, vec2 c, float a, float b, float sAng, float eAng) | 得到中心c，长轴a，短轴b，起始角度sAng，结束角度eAng的椭圆弧的有向距离场 |
+| SDF sdf_arc(vec2 st, vec2 c, float r, float sAng, float eAng) | 得到中心c，半径r，起始角度sAng，结束角度eAng的圆弧的有向距离场 |
+| SDF sdf_rhombus(vec2 st, vec2 cr, float w, float h) | 得到中心cr，宽w，高h的菱形的有向距离场 |
+| SDF regular_polygon(vec2 st, vec2 center, float r, float rotation, const int edges, bool hypocycloid) | 得到中心点center，半径r，旋转角度rotation，边数，是否使用内摆线的正多边形有向距离场 |
+| SDF regular_polygon(vec2 st, vec2 center, float r, const int edges) | 得到中心点center，半径r，边数edges的正多边形 |
+
+图形的有向距离场数据，通过stroke和fill函数将它转为单位距离场UDF，然后通过混合颜色数据输出到画布上。
+
+---
+
+| 方法 | 介绍 |
+| --- | --- |
+| UDF stroke(SDF d, float d0, float w, float smth) | 将有向距离场等于d0附近宽度为w的区域转为UDF，smth是消锯齿的百分比 |
+| UDF stroke(SDF d, float w, float smth) | 将有向距离场等于0附近宽度为w的区域转为UDF，smth是消锯齿的百分比 |
+| UDF stroke(SDF d, float w) | 将有向距离场等于0附近宽度为w的区域转为UDF |
+| UDF fill(SDF d, float start, float end, float smth)  | 将有向距离场start到end区间的区域转为UDF，smth是两侧消锯齿百分比 |
+| UDF fill(SDF d, float start, float smth) | 将有向距离场start到1区间的区域转为UDF，smth是两侧消锯齿百分比 |
+| UDF fill(SDF d, float smth) | 将有向距离场0到1区间的区域转为UDF，smth是两侧消锯齿百分比 |
+| UDF fill(SDF d) | 将有向距离场0到1区间的区域转为UDF，不消锯齿 |
+
+例：用sdf_triangle和fill绘制三角形
+
+<DemoGround demoId="docs/sdf_triangle" height="396"></DemoGround>
+
+更多绘图例子详见[基础图形](/shape)。
+
+#### 2. 图形函数
+
+除了基础的基于距离场的绘图之外，graphics 还提供一系列图形函数。这些图形函数利用直角坐标系与极坐标系绘制有趣的图形。
+
+---
+
+| 方法 | 介绍 |
+| --- | --- |
+| UDF shape_blade(vec2 st, vec2 center, float num) | 以center为中心，绘制num个叶子 |
+| UDF shape_infinity(vec2 st, vec2 center) | 以center为中心，绘制“无穷大”图形 |
+| UDF shape_clover(vec2 st, vec2 center, float num) | 以center为中心，绘制num个花瓣 |
+| UDF shape_flower(vec2 st, vec2 center, float num) | 以center为中心，绘制num个花瓣 |
+| UDF shape_gourd(vec2 st, vec2 center)  | 以center为中心，绘制葫芦图形 |
+| UDF shape_apple(vec2 st, vec2 center) | 以center为中心，绘制苹果 |
+| UDF shape_bud(vec2 st, vec2 center, float num)  | 以center为中心，绘制num瓣花苞 |
+| UDF shape_star(vec2 st, vec2 center) | 以center为中心，绘制五角星 |
+| UDF shape_regular_polygon(vec2 st, vec2 center, const int edges) | 以center为中心，绘制edges条边的正多边形 |
+| UDF shape_triangle(vec2 st, vec2 center) | 以center为中心，绘制正三角形 |
+| UDF shape_rhombus(vec2 st, vec2 center) | 以center为中心，绘制菱形 |
+| UDF shape_pentagon(vec2 st, vec2 center) | 以center为中心，绘制正五边形 |
+| UDF shape_hexagon(vec2 st, vec2 center) | 以center为中心，绘制正六边形 |
+| UDF shape_heptagon(vec2 st, vec2 center) | 以center为中心，绘制正七边形 |
+| UDF shape_octagon(vec2 st, vec2 center) | 以center为中心，绘制正八边形 |
+| UDF shape_hypocycloid(vec2 st, vec2 center, const int edges) | 以center为中心，绘制edges条边的内摆线正多边形 |
+| UDF shape_cross(vec2 st, vec2 center) | 以center为中心，绘制十字 |
+
+例：绘制随机图形
+
+<DemoGround demoId="preview/shapes" height="396"></DemoGround>
+
+3. 其他函数
+
+| 方法 | 介绍 |
+| --- | --- |
+| PLOT(f, st, step) | 这是一个宏，用来绘制连续曲线 |
+| UDF udf_intersect(UDF d1, UDF d2) | 绘制两个UDF的交集部分 |
+| UDF udf_union(UDF d1, UDF d2)  | 绘制两个UDF的并集部分 |
+| UDF udf_complement(UDF d1, UDF d2)  | 绘制两个UDF的补集部分 |
+
+<DemoGround demoId="docs/udf_complement" height="396"></DemoGround>
+
+## transform 模块
+
+这是用来方便做平移、旋转、缩放等矩阵运算的模块。
+
+---
+
+| 方法 | 介绍 |
+| --- | --- |
+| vec2 transform(vec2 v0, mat3 matrix)  | 向量v0与三维矩阵做一个 transform |
+| vec2 translate(vec2 v0, vec2 xy) | 向量v0平移xy |
+| vec2 translate(vec2 v0, vec2 xy) | 向量v0平移xy |
+| vec2 scale(vec2 v0, vec2 origin, vec2 scale) | 向量v0以origin为中心缩放 |
+| vec2 scale(vec2 v0, vec2 scaleXY) | 向量v0以坐标原点为中心缩放 |
+| vec2 rotate(vec2 v0, vec2 origin, float ang) | 向量v0以origin为中心旋转ang角度 |
+| vec2 rotate(vec2 v0, float ang) | 向量v0以坐标原点为中心旋转ang角度 |
+| vec2 skew(vec2 v0, vec2 origin, vec2 skew) | 向量v0以origin为中心扭曲 |
+| vec2 skew(vec2 v0, vec2 skewXY) | 向量v0以坐标原点为中心扭曲 |
+
+例：旋转
+
+<DemoGround demoId="docs/rotation" height="396"></DemoGround>
+
+## pattern 模块
+
+pattern模块创造网格用来绘制重复图案。基本原理见[The Book of Shaders 图案](https://thebookofshaders.com/09/?lan=ch)。
+
+---
+
+| 方法 | 介绍 |
+| --- | --- |
+| vec2 grid_xy(vec2 st, vec2 grid) | 创建不重叠的格子，每个格子坐标范围 0.0 ~ 1.0 |
+| void grid_overlap(vec2 st, vec2 grid, inout vec2 overlap[4]) | 创建重叠的格子，每个格子返回坐标范围 -1.0 ~ 1.0 |
+| vec2 grid_index(vec2 st, vec2 grid) | 获取当前坐标所在网格的编号 |
+| bool grid_odd(vec2 idx, vec2 grid) | 判断当前坐标是否属于第奇数个网格 |
+| bool grid_even(vec2 idx, vec2 grid) | 判断当前坐标是否属于第偶数个网格 |
+| bool grid_odd_row(vec2 idx, vec2 grid) | 判断当前坐标是否属于第奇数行 |
+| bool grid_even_row(vec2 idx, vec2 grid) | 判断当前坐标是否属于第偶数行 |
+| bool grid_odd_col(vec2 idx, vec2 grid)  | 判断当前坐标是否属于第奇数列 |
+| bool grid_even_col(vec2 idx, vec2 grid)  | 判断当前坐标是否属于第偶数列 |
+| float mist(vec2 st) | 产生云雾效果 |
+| float juila_set(vec2 st, vec2 center, float dist, vec2 c, float scale) | juila 分形集合 |
+
+例：网格图案
+
+<DemoGround demoId="preview/random" height="396"></DemoGround>
+
+
+例：云雾
+
+<DemoGround demoId="preview/mist" height="396"></DemoGround>
+
+## color 模块
+
+color模块可以处理RGB和HSB颜色。
+
+---
+
+| 方法 | 介绍 |
+| --- | --- |
+| vec3 RGB(float r, float g, float b) | 以0~1表示的RGB色值 |
+| vec3 RGB(int r, int g, int b) | 以0~255表示的RGB色值 |
+| vec4 RGBA(float r, float g, float b, float a) | 以0~1表示的RGBA色值 |
+| vec4 RGBA(int r, int g, int b, float a) | 以0~255表示的RGBA色值 |
+| vec3 HSB(float r, float g, float b) | 将以0~1表示的HSB色值转换为对应的RGB色值 |
+| vec3 HSB(int r, int g, int b) | 将以0~255表示的HSB色值转换为对应的RGB色值 |
+| vec3 HSBA(float r, float g, float b, float a) | 将以0~1表示的HSBA色值转换为对应的RGBA色值 |
+| vec3 HSBA(int r, int g, int b, float a) | 将以0~255表示的HSBA色值转换为对应的RGBA色值 |
+
+例：HSB颜色
+
+<DemoGround demoId="docs/hsb_color" height="396"></DemoGround>
