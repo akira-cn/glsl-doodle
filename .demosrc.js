@@ -9,7 +9,7 @@ module.exports = function(env) {
     },
     staticFolder: env === 'development' ? 'dist': null,
     themeFile: 'demos/theme.scss',
-    demoList: env === 'development' ? '.demoList.dev.json': '.demoList.prod.json',
+    // demoList: env === 'development' ? '.demoList.dev.json': '.demoList.prod.json',
     name: 'DOODLE',
     version: 'v1',
     homePage: global.top == null || global.top === global ? 'http://doodle.webgl.group/' : location.href,
