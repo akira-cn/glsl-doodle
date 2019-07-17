@@ -15,9 +15,9 @@ module.exports = function (env = {}) {
       libraryTarget: 'umd',
       libraryExport: 'default',
     },
-    // resolve: {
-    //
-    // },
+    resolve: {
+      alias: {'gl-renderer': 'gl-renderer/src/index.js'},
+    },
 
     module: {
       rules: [
