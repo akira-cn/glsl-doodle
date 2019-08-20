@@ -111,7 +111,7 @@ export default class Doodle extends GlRender {
     }
   }
 
-  useProgram(program) {
+  useProgram(program, attrOptions) {
     const gl = this.gl;
     const canvas = gl.canvas;
 
@@ -122,7 +122,7 @@ export default class Doodle extends GlRender {
       });
     }
     delete this.startRenderTime;
-    super.useProgram(program);
+    super.useProgram(program, attrOptions);
     this[_eventHandlers] = [];
 
     if(this._preloadedTextures) {
