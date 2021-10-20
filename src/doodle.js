@@ -27,13 +27,10 @@ export default class Doodle extends GlRender {
   }
 
   static autoLoad() {
-    window.addEventListener('DOMContentLoaded', (e) => {
+    function load() {
       const doodleElement = document.querySelectorAll('glsl-doodle');
-
       doodleElement.forEach(async (el) => {
-        const canvas = document.createElement('canvas');
-        canvas.width = el.getAttribute('width') || 512;
-        canvas.height = el.getAttribute('height') || 512;
+        if(el.getAttribute('loaded')) return;
 
         let root = el;
         if(el.attachShadow) {
@@ -41,7 +38,13 @@ export default class Doodle extends GlRender {
         } else if(el.createShadowRoot) {
           root = el.createShadowRoot();
         }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = el.getAttribute('width') || 512;
+        canvas.height = el.getAttribute('height') || 512;
+
         root.appendChild(canvas);
+        el.setAttribute('loaded', 'loaded');
 
         const doodle = new Doodle(canvas);
 
@@ -77,7 +80,9 @@ export default class Doodle extends GlRender {
 
         doodle.render();
       });
-    });
+    }
+    load();
+    window.addEventListener('DOMContentLoaded', load);
   }
 
   async compile(frag, vert) {

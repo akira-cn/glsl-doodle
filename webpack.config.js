@@ -14,6 +14,7 @@ module.exports = function (env = {}) {
       library: ['Doodle'],
       libraryTarget: 'umd',
       libraryExport: 'default',
+      globalObject: 'globalThis',
     },
     resolve: {
       alias: {'gl-renderer': 'gl-renderer/src/index.js'},
