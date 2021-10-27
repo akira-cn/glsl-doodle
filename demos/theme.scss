@@ -1,3 +1,10 @@
+$c-gap: #dadfbe;
+$c-bg: white;
+$c-font: #3f3e3c;
+$c-font-contrast:rgb(231, 224, 224);
+$c-font-menuitem: rgba($c-font, 0.6);
+$c-highlight: #492908;
+
 .sidebar-menuItem.router-link-active {
   color: $c-font;
 }

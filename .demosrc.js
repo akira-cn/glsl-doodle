@@ -23,7 +23,7 @@ module.exports = function(env) {
     // tomorrowNightBright, tomorrowNightEighties, tomorrowNight, tomorrow,
     // twilight, vibrantInk, zenburnesque, iplastic, idlefingers, krtheme,
     // monoindustrial,
-    boxTheme: 'monokai',
+    boxTheme: 'tomorrow',
     globalPackages: {
       js: [env === 'development' ? '/glsl-doodle.js': '/js/glsl-doodle.js'],
       css: [],
