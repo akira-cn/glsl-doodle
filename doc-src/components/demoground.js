@@ -8,7 +8,10 @@ export default class extends Component {
       border: 'solid 1px #ccc',
       margin: '10px 0',
     };
-    const source = `//doodle.webgl.group/demo/#/${this.props.demoId}`;
+    let source = `//doodle.webgl.group/demo/#/${this.props.demoId}`;
+    if(window.location.hostname === '127.0.0.1') {
+      source = `//localhost:3030/#/${this.props.demoId}`;
+    }
     return (
       <iframe src={source}
         scrolling="yes"
