@@ -90,18 +90,6 @@ export default class Doodle extends GlRender {
   }
 
   async compile(frag, vert) {
-    if(this.options.webgl2) {
-      vert = `#version 300 es
-precision highp float;
-precision highp int;
-
-in vec3 a_vertexPosition;
-
-void main() {
-  gl_PointSize = 1.0;
-  gl_Position = vec4(a_vertexPosition, 1);
-}`;
-    }
     const program = await super.compile(frag, vert);
 
     const {fragmentShader} = program.shaderText;

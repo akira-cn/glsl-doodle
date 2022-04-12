@@ -87,8 +87,14 @@ vec3 hsb_color(vec3 v) {
 #define HSBA hsba_color
 #endif
 
+#ifndef WEBGL2
+#define FragColor gl_FragColor
+#else
+out vec4 FragColor;
+#endif
+
 void color(UDF d, vec4 c1, vec4 c2) {
-  gl_FragColor = mix(c2, c1, d);
+  FragColor = mix(c2, c1, d);
 }
 
 void color(UDF d, vec4 c1, vec3 c2) {
@@ -104,11 +110,11 @@ void color(UDF d, vec3 c1, vec3 c2) {
 }
 
 void color(UDF d, vec4 c) {
-  color(d, c, gl_FragColor);
+  color(d, c, FragColor);
 }
 
 void color(UDF d, vec3 c) {
-  color(d, vec4(c, 1.0), gl_FragColor);
+  color(d, vec4(c, 1.0), FragColor);
 }
 
 #endif
