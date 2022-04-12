@@ -45,6 +45,6 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.5",
-    "gl-renderer": "^0.7.5"
+    "gl-renderer": "^0.13.6"
   }
 }

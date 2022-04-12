@@ -42,11 +42,14 @@ export default class Doodle extends GlRender {
         const canvas = document.createElement('canvas');
         canvas.width = el.getAttribute('width') || 512;
         canvas.height = el.getAttribute('height') || 512;
+        canvas.setAttribute('part', 'doodle');
 
         root.appendChild(canvas);
         el.setAttribute('loaded', 'loaded');
 
-        const doodle = new Doodle(canvas);
+        const isWebGL2 = el.hasAttribute('webgl2') && el.getAttribute('webgl2') !== 'false';
+
+        const doodle = new Doodle(canvas, {webgl2: isWebGL2});
 
         const fragmentEl = el.getAttribute('fragment-for') || el.getAttribute('for');
         const vertexEl = el.getAttribute('vertex-for');
@@ -79,6 +82,7 @@ export default class Doodle extends GlRender {
         doodle.useProgram(program);
 
         doodle.render();
+        window.doodle = doodle;
       });
     }
     load();
@@ -86,6 +90,18 @@ export default class Doodle extends GlRender {
   }
 
   async compile(frag, vert) {
+    if(this.options.webgl2) {
+      vert = `#version 300 es
+precision highp float;
+precision highp int;
+
+in vec3 a_vertexPosition;
+
+void main() {
+  gl_PointSize = 1.0;
+  gl_Position = vec4(a_vertexPosition, 1);
+}`;
+    }
     const program = await super.compile(frag, vert);
 
     const {fragmentShader} = program.shaderText;
