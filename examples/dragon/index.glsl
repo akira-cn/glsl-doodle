@@ -1,8 +1,3 @@
-#version 300 es
-
-precision highp float;
-precision highp int;
-
 #define PI	3.14159265359
 #define PI2 PI*2.0
 #define PIH PI*0.5
@@ -13,10 +8,6 @@ precision highp int;
 #define TAIL 2.0
 
 #define ZOOM 0
-
-uniform float dd_time;
-uniform int dd_frameIndex;
-uniform vec2 dd_resolution;
 
 mat2 rotate(in float a)
 {
@@ -107,7 +98,7 @@ float pattern(in vec2 p) {
 
 vec2 bodyCurve(in float x)
 {
-    float t = dd_time * 1.5;
+    float t = iTime * 1.5;
     return vec2(
         0.05*cos(x*5.0+t)+0.1*cos(x*3.0+t),
         0.1*sin(x*5.0+t)+0.15*sin(x*3.0+t));
@@ -115,7 +106,7 @@ vec2 bodyCurve(in float x)
     
 float barbCurve(in float x)
 {
-    float t = dd_time * 1.5;
+    float t = iTime*1.5;
  	return mix(0.0,0.02*sin(-40.0*x+t),clamp(x*5.0,0.0,1.0));   
 }
 
@@ -268,7 +259,7 @@ float mapHead(in vec3 p)
     // BottomJaw postion
     q = p;
     q.y -= -0.01;    
-    q.xy *= rotate(0.1*sin(dd_time)+0.3);
+    q.xy *= rotate(0.1*sin(iTime)+0.3);
    
     float de = 1.0;
     de =  min(de, mapTop(p));
@@ -432,9 +423,9 @@ float mapDragon(in vec3 p)
 float mapGround(in vec3 p)
 {
     float de = p.y-0.2;
-    de -= 0.02*sin(5.0*p.x+dd_time*0.5);
-    de -= 0.02*sin(7.0*p.z+dd_time*1.5);
-    de -= 0.02*sin(8.0*length(p.zx)+dd_time);
+    de -= 0.02*sin(5.0*p.x+iTime*0.5);
+    de -= 0.02*sin(7.0*p.z+iTime*1.5);
+    de -= 0.02*sin(8.0*length(p.zx)+iTime);
     return de;
 }
 
@@ -446,7 +437,7 @@ vec3 doMotion(in vec3 p)
     return p;
 #endif
     
-    float t = mod(dd_time,60.0);
+    float t = mod(iTime,60.0);
     float h;
     if (t < 40.0)
     {
@@ -549,7 +540,7 @@ vec3 doColor(in vec3 p)
         return col;
     }
     p.y -= -0.01;    
-    p.xy *= rotate(0.1*sin(dd_time)+0.3);
+    p.xy *= rotate(0.1*sin(iTime)+0.3);
     if (mapBottomFang(p)<e) return vec3(0.8);
 
     return vec3(0.15,0.3,0.25);
@@ -559,7 +550,7 @@ vec3 doColor(in vec3 p)
 vec3 calcNormal(in vec3 pos)
 {
     vec3 n = vec3(0.0);
-    for( int i=min(dd_frameIndex,0); i<4; i++ )
+    for( int i=min(iFrame,0); i<4; i++ )
     {
         vec3 e = 0.5773*(2.0*vec3((((i+3)>>1)&1),((i>>1)&1),(i&1))-1.0);
         n += e*map(pos+0.001*e);
@@ -579,20 +570,20 @@ vec3 calcNormal(in vec3 pos)
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
-    vec2 p2 = (2.0*fragCoord-dd_resolution)/dd_resolution.y;
+    vec2 p2 = (2.0*fragCoord-iResolution.xy)/iResolution.y;
     vec3 col = vec3(0.8,0.8,0.9)*(1.0-0.7*p2.y*p2.y);
     vec3 rd = normalize(vec3(p2,2.0));    
     vec3 ro = vec3(0.0,0.8,2.5);  
-    ro.xz *= rotate(PI*0.77777*floor(dd_time/60.0));
+    ro.xz *= rotate(PI*0.77777*floor(iTime/60.0));
     vec3 ta = vec3(0.0,0.2,0.0);
-    ro += 0.03*sin(2.0*dd_time*vec3(1.1,1.2,1.3));
-	ta += 0.03*sin(2.0*dd_time*vec3(1.7,1.5,1.6));
+    ro += 0.03*sin(2.0*iTime*vec3(1.1,1.2,1.3));
+	ta += 0.03*sin(2.0*iTime*vec3(1.7,1.5,1.6));
 
 #if ZOOM
 	#if 1
     	// face
     	ro = vec3(0.0,1.8,0.7);
-    	ro.xz *= rotate(1.2*sin(dd_time*0.3));
+    	ro.xz *= rotate(1.2*sin(iTime*0.3));
     	ta = vec3(bodyCurve(HEAD),1.5).xzy;
 	#else
     	// hand
@@ -623,10 +614,4 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 		col = pow(col,vec3(0.7));
     }
     fragColor = vec4(col,1.0);
-}
-
-out vec4 FragColor;
-
-void main() {
-  mainImage(FragColor, gl_FragCoord.xy);
 }

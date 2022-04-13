@@ -8,8 +8,9 @@ import transform from './lib/transform.glsl';
 import graphics from './lib/graph.glsl';
 import color from './lib/color.glsl';
 import pattern from './lib/pattern.glsl';
+import shadertoy from './lib/shadertoy.glsl';
 
-GlRender.addLibs({stdlib, box, transform, graphics, color, pattern, shapes, shaper});
+GlRender.addLibs({stdlib, box, transform, graphics, color, pattern, shapes, shaper, shadertoy});
 
 const _eventHandlers = Symbol('eventHandlers');
 
@@ -47,9 +48,10 @@ export default class Doodle extends GlRender {
         root.appendChild(canvas);
         el.setAttribute('loaded', 'loaded');
 
-        const isWebGL2 = el.hasAttribute('webgl2') && el.getAttribute('webgl2') !== 'false';
+        const isShaderToy = el.hasAttribute('shadertoy') && el.getAttribute('shadertoy') !== 'false';
+        const isWebGL2 = isShaderToy || (el.hasAttribute('webgl2') && el.getAttribute('webgl2') !== 'false');
 
-        const doodle = new Doodle(canvas, {webgl2: isWebGL2});
+        const doodle = new Doodle(canvas, {webgl2: isWebGL2, shadertoy: isShaderToy});
 
         const fragmentEl = el.getAttribute('fragment-for') || el.getAttribute('for');
         const vertexEl = el.getAttribute('vertex-for');
@@ -90,6 +92,29 @@ export default class Doodle extends GlRender {
   }
 
   async compile(frag, vert) {
+    const istoy = this.options.shadertoy;
+    if(istoy) {
+      frag = `#version 300 es
+
+precision highp float;
+precision highp int;
+
+#define WEBGL2
+#pragma include <shadertoy>
+
+${frag}
+`;
+      let fragColor = '';
+      if(!/^\s*out\s+vec4\s+FragColor/mg.test(frag)) {
+        fragColor = 'out vec4 FragColor;';
+      }
+      frag = `${frag}
+${fragColor}
+
+void main() {
+  mainImage(FragColor, gl_FragCoord.xy);
+}`;
+    }
     const program = await super.compile(frag, vert);
 
     const {fragmentShader} = program.shaderText;
@@ -103,6 +128,12 @@ export default class Doodle extends GlRender {
     }
 
     return program;
+  }
+
+  // override
+  async loadTexture(source, {useImageBitmap = true} = {}) {
+    const img = await Doodle.loadImage(source, {useImageBitmap});
+    return this.createTexture(img, {wrapS: this.gl.REPEAT, wrapT: this.gl.REPEAT});
   }
 
   setFeebackContext() {
@@ -353,4 +384,8 @@ export default class Doodle extends GlRender {
       this.uniforms.dd_touchEvent = 0;
     }
   }
+
+  // _draw() {
+  //   super._draw();
+  // }
 }
