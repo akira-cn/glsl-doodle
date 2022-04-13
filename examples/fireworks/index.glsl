@@ -1,4 +1,4 @@
-#pragma texture /fireworks/sampler0.png
+#pragma texture /fireworks/rgba-noise.jpg
 uniform sampler2D dd_sampler0;
 
 #define NUM_PARTICLES	75
@@ -11,7 +11,7 @@ vec3 pow3(vec3 v, float p)
 
 vec2 noise(vec2 tc)
 {
-    return (3.6*texture(iChannel0, tc).xy-1.).xy + 0.3;
+    return (3.*texture(iChannel0, tc).xy-1.).xy + 0.3;
 }
 
 vec3 fireworks(vec2 p)
@@ -36,30 +36,6 @@ vec3 fireworks(vec2 p)
     }
     return color;
 }
-
-// vec3 fireworks(vec2 p)
-// {
-//     vec3 color = vec3(0., 0., 0.);
-    
-//     for(int fw = 0; fw < NUM_FIREWORKS; fw++)
-//     {
-//         // vec2 pos = noise(vec2(0.82, 0.11)*float(fw))*1.5;
-//     	// float time = mod(iTime*3., 6.*(1.+noise(vec2(0.123, 0.987)*float(fw)).x));
-//         for(int i = 0; i < NUM_PARTICLES; i++)
-//     	{
-//         	// vec2 dir = noise(vec2(0.512, 0.133)*float(i));
-//             // dir.y -=time * 0.1;
-//             float term = 1./length(p)/50.;
-//             color += pow3(vec3(
-//                 term * noise(vec2(0.123, 0.133)*float(i)).y,
-//                 0.0,
-//                 0.0),
-//                           1.25);
-//         }
-//     }
-//     return color;
-// }
-
 
 vec3 flag(vec2 p)
 {
