@@ -84,7 +84,9 @@ export default class Doodle extends GlRender {
         doodle.useProgram(program);
 
         doodle.render();
-        window.doodle = doodle;
+        const event = new CustomEvent('load', {detail: {doodle}});
+        el.dispatchEvent(event);
+        // window.doodle = doodle;
       });
     }
     load();
@@ -335,6 +337,10 @@ void main() {
     if('dd_samplerFeedback' in uniforms) {
       this.setFeebackContext();
     }
+    // 放在自定义事件 load 中
+    // program.meshData[0].enableBlend = true;
+    // gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    // gl.clearColor(0, 0, 0, 1.0);
     return program;
   }
 

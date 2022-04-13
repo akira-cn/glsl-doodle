@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>GLSL Doodle</title>
+  <script src="/js/glsl-doodle.js"></script>
+  <style>
+    glsl-doodle::part(doodle) {
+      width: 640px;
+      height: 360px;
+    }
+  </style>
+</head>
+<body>
+  <glsl-doodle shadertoy width="1280" height="720"></glsl-doodle>
+  <script>
+    document.querySelector('glsl-doodle').addEventListener('load', ({detail}) => {
+      const {program, gl} = detail.doodle;
+      program.meshData[0].enableBlend = true;
+      gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      gl.clearColor(0, 0, 0, 1.0);
+    });
+  </script>
+</body>
+</html>
