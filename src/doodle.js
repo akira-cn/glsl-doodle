@@ -86,7 +86,7 @@ export default class Doodle extends GlRender {
         doodle.render();
         const event = new CustomEvent('load', {detail: {doodle}});
         el.dispatchEvent(event);
-        // window.doodle = doodle;
+        el._doodle = doodle;
       });
     }
     load();
