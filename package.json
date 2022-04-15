@@ -1,6 +1,6 @@
 {
   "name": "glsl-doodle",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Drawing patterns with glsl shaders on modern browsers.",
   "main": "dist/glsl-doodle.js",
   "scripts": {
