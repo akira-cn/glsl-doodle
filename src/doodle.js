@@ -70,11 +70,6 @@ export default class Doodle extends GlRender {
         root.appendChild(canvas);
         el.setAttribute('loaded', 'loaded');
 
-        const isShaderToy = el.hasAttribute('shadertoy') && el.getAttribute('shadertoy') !== 'false';
-        const isWebGL2 = isShaderToy || (el.hasAttribute('webgl2') && el.getAttribute('webgl2') !== 'false');
-
-        const doodle = new Doodle(canvas, {webgl2: isWebGL2, shadertoy: isShaderToy});
-
         const fragmentEl = el.getAttribute('fragment-for') || el.getAttribute('for');
         const vertexEl = el.getAttribute('vertex-for');
 
@@ -102,6 +97,18 @@ export default class Doodle extends GlRender {
           if(vertexURL) vertex = await GlRender.fetchShader(vertexURL);
         }
 
+        const isShaderToy = el.hasAttribute('shadertoy') && el.getAttribute('shadertoy') !== 'false';
+        let isWebGL2 = isShaderToy;
+        if(!isWebGL2 && vertex && /^\s*#version\s+300\s+es/mg.test(vertex)) isWebGL2 = true;
+        if(!isWebGL2 && fragment && /^\s*#version\s+300\s+es/mg.test(fragment)) {
+          isWebGL2 = true;
+          if(!/^\s*#define\s+WEBGL2/mg.test(fragment)) {
+            fragment = fragment.replace(/^(\s*#version\s+300\s+es)/mg, '$1\n#define WEBGL2\n');
+          }
+        }
+
+        const doodle = new Doodle(canvas, {webgl2: isWebGL2, shadertoy: isShaderToy});
+
         const program = await doodle.compile(fragment, vertex);
         doodle.useProgram(program);
 
@@ -119,11 +126,11 @@ export default class Doodle extends GlRender {
     const istoy = this.options.shadertoy;
     if(istoy) {
       frag = `#version 300 es
+#define WEBGL2
 
 precision highp float;
 precision highp int;
 
-#define WEBGL2
 #pragma include <shadertoy>
 
 ${frag}

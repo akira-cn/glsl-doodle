@@ -1,7 +1,5 @@
 #version 300 es
 
-#define WEBGL2;
-
 precision highp float;
 precision highp int;
 
