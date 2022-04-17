@@ -70,6 +70,16 @@ export default class Doodle extends GlRender {
         root.appendChild(canvas);
         el.setAttribute('loaded', 'loaded');
 
+        const style = document.createElement('style');
+        style.textContent = `:host {
+  display: block;
+}
+canvas {
+  max-width: 100%;
+  max-height: 100%;
+}`;
+        root.appendChild(style);
+
         const fragmentEl = el.getAttribute('fragment-for') || el.getAttribute('for');
         const vertexEl = el.getAttribute('vertex-for');
 
@@ -154,7 +164,7 @@ void main() {
     if(matches) {
       this._preloadedTextures = await Promise.all(matches.map(async (m, i) => {
         const p = m.match(/^#pragma\s+texture\s+(.*)/);
-        if(/\.(glsl|frag)$/.test(p)) {
+        if(/\.(glsl|frag)|^#.+$/.test(p[1])) {
           this._fbos = this._fbos || {};
           this._fbosList = this._fbosList || [];
           let fboObject = this._fbos[p[1]];
@@ -175,7 +185,7 @@ void main() {
             this._fbos[p[1]] = fboObject;
 
             // 是否要新创建 fboProgram
-            const f = await GlRender.fetchShader(p[1]);
+            const f = /^#/.test(p[1]) ? document.querySelector(p[1]).textContent : await GlRender.fetchShader(p[1]);
             const fboProgram = await this.compile(f, vert);
 
             // const fbo = this.createFBO();
