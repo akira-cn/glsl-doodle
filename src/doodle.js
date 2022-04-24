@@ -35,15 +35,6 @@ function applyFBO(program) {
   }
 }
 
-function arrEqual(a1, a2) {
-  if(!a1 && a2 || a1 && !a2) return false;
-  if(a1.length !== a2.length) return false;
-  for(let i = 0; i < a1.length; i++) {
-    if(a1[i] !== a2[i]) return false;
-  }
-  return true;
-}
-
 export default class Doodle extends GlRender {
   static defaultOptions = {
     preserveDrawingBuffer: true,
@@ -280,35 +271,15 @@ void main() {
     // createEvents
     const uniforms = this[_eventUniforms];
 
-    if(!('dd_mouseEvent' in uniforms) && 'dd_mouseEvent' in program.uniforms) {
-      // 0 - none, 1 - mousedown 2 - mouseup 3 - mousewheel
-      uniforms.dd_mouseEvent = 0;
-      const mousedown = () => {
-        uniforms.dd_mouseEvent = 1;
-      };
-      const mouseup = () => {
-        uniforms.dd_mouseEvent = 2;
-      };
-      const mousewheel = () => {
-        uniforms.dd_mouseEvent = 3;
-      };
-      canvas.addEventListener('mousedown', mousedown);
-      canvas.addEventListener('mouseup', mouseup);
-      canvas.addEventListener('mousewheel', mousewheel);
-      this[_eventHandlers].push(
-        {event: 'mousedown', mousedown},
-        {event: 'mouseup', mouseup},
-        {event: 'mousewheel', mousewheel},
-      );
-    }
-
-    if(!('dd_mouseRec' in uniforms) && 'dd_mouseRec' in program.uniforms) { // shadertoy
+    if(!('dd_mouseRec' in uniforms) && 'dd_mouseRec' in program.uniforms) {
+      // shadertoy - https://www.shadertoy.com/view/Mss3zH#
       uniforms.dd_mouseRec = [-1.0, -1.0, 0.0, 0.0];
       const mousedown = (e) => {
         let [x, y] = getPointerXY(canvas, e);
         x *= canvas.width;
         y *= canvas.height;
         uniforms.dd_mouseRec = [x, y, x, y];
+        this.update();
       };
       const mousemove = (e) => {
         let [x, y] = getPointerXY(canvas, e);
@@ -317,11 +288,13 @@ void main() {
         if(e.buttons) {
           const rec = uniforms.dd_mouseRec;
           uniforms.dd_mouseRec = [x, y, rec[2], rec[3]];
+          this.update();
         }
       };
       const mouseup = (e) => {
         const rec = uniforms.dd_mouseRec;
         uniforms.dd_mouseRec = [rec[0], rec[1], -Math.abs(rec[2]), rec[3]];
+        this.update();
       };
       canvas.addEventListener('mousemove', mousemove);
       canvas.addEventListener('mousedown', mousedown);
@@ -339,17 +312,21 @@ void main() {
       const mousemove = (e) => {
         const [x, y] = getPointerXY(canvas, e);
         uniforms.dd_mousePosition = [x, y, e.buttons, 0.0];
+        this.update();
       };
       const mouseleave = (e) => {
         uniforms.dd_mousePosition = [-1.0, -1.0, 0.0, 0.0];
+        this.update();
       };
       const mousedown = (e) => {
         const [x, y] = getPointerXY(canvas, e);
         uniforms.dd_mousePosition = [x, y, e.buttons, e.buttons];
+        this.update();
       };
       const mouseup = (e) => {
         const [x, y] = getPointerXY(canvas, e);
         uniforms.dd_mousePosition = [x, y, 0.0, 0.0];
+        this.update();
       };
       canvas.addEventListener('mousemove', mousemove);
       canvas.addEventListener('mouseleave', mouseleave);
@@ -363,55 +340,36 @@ void main() {
       );
     }
 
-    if(!('dd_mouseButtons' in uniforms) && 'dd_mouseButtons' in program.uniforms) {
-      uniforms.dd_mouseButtons = 0;
-      const mouseenter = (e) => {
-        uniforms.dd_mouseButtons = e.buttons;
-      };
+    if(!('dd_mouseDown' in uniforms) && 'dd_mouseDown' in program.uniforms) {
+      // vec3 坐标， buttons
+      uniforms.dd_mouseDown = [-1.0, -1.0, 0.0];
       const mousedown = (e) => {
-        uniforms.dd_mouseButtons = e.buttons;
+        const [x, y] = getPointerXY(canvas, e);
+        uniforms.dd_mouseDown = [x, y, e.buttons];
+        this.update();
       };
       const mouseup = (e) => {
-        uniforms.dd_mouseButtons = e.buttons;
+        uniforms.dd_mouseDown[2] = e.buttons;
+        this.update();
       };
-      const mouseleave = (e) => {
-        uniforms.dd_mouseButtons = 0;
-      };
-      canvas.addEventListener('mouseenter', mouseenter);
       canvas.addEventListener('mousedown', mousedown);
       canvas.addEventListener('mouseup', mouseup);
-      canvas.addEventListener('mouseleave', mouseleave);
       this[_eventHandlers].push(
-        {event: 'mouseenter', mouseenter},
         {event: 'mousedown', mousedown},
-        {event: 'mouseup', mouseup},
-        {event: 'mouseleave', mouseleave},
+        {event: 'mouseup', mouseup}
       );
     }
 
     if(!('dd_keyEvent' in uniforms) && 'dd_keyEvent' in program.uniforms) {
-      // 0 - none, 1 - keydown, 2 - keyup
-      uniforms.dd_keyEvent = 0;
+      // vec2(keyCode, keyEvent: 0 - none, 1 - keydown, 2 - keyup)
+      uniforms.dd_keyEvent = [0, 0];
       const keydown = (e) => {
-        uniforms.dd_keyEvent = 1;
+        uniforms.dd_keyEvent = [e.keyCode, 1];
+        this.update();
       };
       const keyup = (e) => {
-        uniforms.dd_keyEvent = 2;
-      };
-      document.addEventListener('keydown', keydown);
-      document.addEventListener('keyup', keyup);
-      this[_eventHandlers].push(
-        {event: 'keydown', keydown},
-        {event: 'keyup', keyup},
-      );
-    }
-    if(!('dd_keyCode' in uniforms) && 'dd_keyCode' in program.uniforms) {
-      uniforms.dd_keyCode = 0;
-      const keydown = (e) => {
-        uniforms.dd_keyCode = e.keyCode;
-      };
-      const keyup = (e) => {
-        uniforms.dd_keyCode = 0;
+        uniforms.dd_keyEvent = [e.keyCode, 2];
+        this.update();
       };
       document.addEventListener('keydown', keydown);
       document.addEventListener('keyup', keyup);
@@ -422,39 +380,21 @@ void main() {
     }
 
     // TODO: support multi-touches
-    if(!('dd_touchPosition' in uniforms) && 'dd_touchPosition' in program.uniforms) {
-      uniforms.dd_touchPosition = [-1.0, -1.0];
-      const touchstart = (e) => {
-        const [x, y] = getPointerXY(canvas, e);
-        uniforms.dd_touchPosition = [x, y];
-      };
-      const touchmove = (e) => {
-        const [x, y] = getPointerXY(canvas, e);
-        uniforms.dd_touchPosition = [x, y];
-      };
-      const touchend = (e) => {
-        uniforms.dd_touchPosition = [-1.0, -1.0];
-      };
-      canvas.addEventListener('touchstart', touchstart);
-      canvas.addEventListener('touchmove', touchmove);
-      canvas.addEventListener('touchend', touchend);
-      this[_eventHandlers].push(
-        {event: 'touchstart', touchstart},
-        {event: 'touchmove', touchmove},
-        {event: 'touchend', touchend},
-      );
-    }
-
     if(!('dd_touchEvent' in uniforms) && 'dd_touchEvent' in program.uniforms) {
-      // 0 - none, 1 - touchstart, 2 - touchend, 3 - touchmove
+      uniforms.dd_touchEvent = [-1.0, -1.0, 0.0];
       const touchstart = (e) => {
-        uniforms.dd_touchEvent = 1;
+        const [x, y] = getPointerXY(canvas, e);
+        uniforms.dd_touchEvent = [x, y, 1];
+        this.update();
       };
       const touchmove = (e) => {
-        uniforms.dd_touchEvent = 3;
+        const [x, y] = getPointerXY(canvas, e);
+        uniforms.dd_touchEvent = [x, y, 2];
+        this.update();
       };
       const touchend = (e) => {
-        uniforms.dd_touchEvent = 2;
+        uniforms.dd_touchEvent[2] = 3;
+        this.update();
       };
       canvas.addEventListener('touchstart', touchstart);
       canvas.addEventListener('touchmove', touchmove);
@@ -487,8 +427,14 @@ void main() {
       this.setMeshData(program.meshData);
     }
 
-    if(!this.startRenderTime) this.startRenderTime = Date.now();
+    this.lastRenderTime = this.lastRenderTime || 0;
+    if(!this.startRenderTime) {
+      this.startRenderTime = Date.now();
+    }
+
     const time = (Date.now() - this.startRenderTime) / 1000;
+    const timeDelta = time - this.lastRenderTime;
+    this.lastRenderTime = time;
     const uniforms = this.uniforms;
     const gl = this.gl;
 
@@ -497,6 +443,40 @@ void main() {
     if('dd_time' in uniforms) {
       uniforms.dd_time = time;
       needUpdate = true;
+    }
+    if('dd_timeDelta' in uniforms) {
+      uniforms.dd_timeDelta = timeDelta;
+    }
+
+    const eventUniforms = this[_eventUniforms];
+
+    if('dd_mousePosition' in uniforms) {
+      const pos = eventUniforms.dd_mousePosition;
+      uniforms.dd_mousePosition = [...pos];
+      if(!fbo) pos[3] = 0;
+    }
+    if('dd_mouseRec' in uniforms) {
+      const rec = eventUniforms.dd_mouseRec;
+      uniforms.dd_mouseRec = [...rec];
+      if(!fbo) rec[3] = -Math.abs(rec[3]);
+    }
+    if('dd_mouseDown' in uniforms) {
+      const pos = eventUniforms.dd_mouseDown;
+      uniforms.dd_mouseDown = [...pos];
+    }
+    if('dd_keyEvent' in uniforms) {
+      const keyEvent = eventUniforms.dd_keyEvent;
+      uniforms.dd_keyEvent = [...keyEvent];
+      if(!fbo && keyEvent[1] === 2) { // keyup
+        keyEvent[1] = 0;
+      }
+    }
+    if('dd_touchEvent' in uniforms) {
+      const touchEvent = eventUniforms.dd_touchEvent;
+      uniforms.touchEvent = [...touchEvent];
+      if(!fbo && touchEvent[2] === 3) { // touchend
+        touchEvent[2] = 0;
+      }
     }
 
     let feedbackTexture;
@@ -509,12 +489,11 @@ void main() {
       uniforms.dd_samplerFeedback = feedbackTexture;
     }
 
+    super.render();
+
     if(feedbackTexture) {
       gl.deleteTexture(feedbackTexture);
     }
-
-    const eventUniforms = this[_eventUniforms];
-
     if('dd_frameIndex' in uniforms) {
       uniforms.dd_frameIndex++;
       needUpdate = true;
@@ -523,38 +502,7 @@ void main() {
       uniforms.dd_randseed = [Math.random(), Math.random()];
       needUpdate = true;
     }
-    if('dd_mousePosition' in uniforms) {
-      const pos = eventUniforms.dd_mousePosition;
-      if(!arrEqual(uniforms.dd_mousePosition, pos)) {
-        uniforms.dd_mousePosition = [...pos];
-        needUpdate = true;
-      }
-      if(!fbo) pos[3] = 0;
-    }
-    if('dd_mouseRec' in uniforms) {
-      const rec = eventUniforms.dd_mouseRec;
-      if(!arrEqual(uniforms.dd_mouseRec, rec)) {
-        uniforms.dd_mouseRec = [...rec];
-        needUpdate = true;
-      }
-      if(!fbo) rec[3] = -Math.abs(rec[3]);
-    }
-    if('dd_mouseEvent' in uniforms) {
-      if(uniforms.dd_mouseEvent !== eventUniforms.dd_mouseEvent) needUpdate = true;
-      uniforms.dd_mouseEvent = eventUniforms.dd_mouseEvent;
-      if(!fbo) eventUniforms.dd_mouseEvent = 0;
-    }
-    if('dd_keyEvent' in uniforms) {
-      if(uniforms.dd_keyEvent !== eventUniforms.dd_keyEvent) needUpdate = true;
-      uniforms.dd_keyEvent = eventUniforms.dd_keyEvent;
-      if(!fbo) eventUniforms.dd_keyEvent = 0;
-    }
-    if('dd_touchEvent' in uniforms) {
-      if(uniforms.dd_touchEvent !== eventUniforms.dd_touchEvent) needUpdate = true;
-      uniforms.dd_touchEvent = eventUniforms.dd_touchEvent;
-      if(!fbo) eventUniforms.dd_touchEvent = 0;
-    }
-    super.render();
+
     if(needUpdate) {
       this.update();
     }

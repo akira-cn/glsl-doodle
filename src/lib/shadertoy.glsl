@@ -6,6 +6,7 @@
 
 #define iResolution vec3(dd_resolution,0)
 #define iTime dd_time
+#define iTimeDelta dd_timeDelta
 // #define iTimeDelta
 #define iFrame dd_frameIndex
 // #define iChannelTime
@@ -19,6 +20,7 @@
 #define iChannel3 dd_sampler3
 
 uniform float dd_time;
+uniform float dd_timeDelta;
 uniform int dd_frameIndex;
 uniform vec2 dd_resolution;
 uniform vec4 dd_mouseRec;
