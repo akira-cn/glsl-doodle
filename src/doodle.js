@@ -15,6 +15,23 @@ GlRender.addLibs({stdlib, box, transform, graphics, color, pattern, shapes, shap
 const _eventHandlers = Symbol('eventHandlers');
 const _eventUniforms = Symbol('eventUniforms');
 
+class FBO {
+  constructor(readFBO, writeFBO) {
+    this.readFBO = readFBO;
+    this.writeFBO = writeFBO;
+  }
+
+  get texture() {
+    return this.readFBO.texture;
+  }
+
+  swap() {
+    const tmp = this.writeFBO;
+    this.writeFBO = this.readFBO;
+    this.readFBO = tmp;
+  }
+}
+
 function getPointerXY(canvas, e) {
   const {left, top} = e.target.getBoundingClientRect();
   const {clientX, clientY} = e.changedTouches ? e.changedTouches[0] : e;
@@ -35,10 +52,13 @@ function applyFBO(program) {
   }
 }
 
+const fboCache = {};
+const passCache = {};
+
 export default class Doodle extends GlRender {
-  static defaultOptions = {
-    preserveDrawingBuffer: true,
-  }
+  // static defaultOptions = {
+  //   preserveDrawingBuffer: true,
+  // }
 
   static autoLoad() {
     function load() {
@@ -108,7 +128,7 @@ canvas {
           }
         }
 
-        const doodle = new Doodle(canvas, {webgl2: isWebGL2, shadertoy: isShaderToy});
+        const doodle = new Doodle(canvas, {webgl2: isWebGL2, shadertoy: isShaderToy, autoUpdate: false});
 
         const program = await doodle.compile(fragment, vertex);
         doodle.useProgram(program);
@@ -134,6 +154,17 @@ precision highp int;
 
 #pragma include <shadertoy>
 
+${(() => {
+    if(!/^\s*uniform.*?dd_sampler/mg.test(frag)) {
+      return `uniform sampler2D dd_sampler0;
+uniform sampler2D dd_sampler1;
+uniform sampler2D dd_sampler2;
+uniform sampler2D dd_sampler3;
+`;
+    }
+    return '';
+  })()}
+
 ${frag}
 `;
       let fragColor = '';
@@ -153,27 +184,15 @@ void main() {
 
     const matches = fragmentShader.match(/^#pragma\s+texture\s+.*/mg);
     if(matches) {
-      this._preloadedTextures = await Promise.all(matches.map(async (m, i) => {
+      program._preloadedTextures = await Promise.all(matches.map(async (m, i) => {
         const p = m.match(/^#pragma\s+texture\s+(.*)/);
         if(/\.(glsl|frag)|^#.+$/.test(p[1])) {
-          this._fbos = this._fbos || {};
           this._fbosList = this._fbosList || [];
-          let fboObject = this._fbos[p[1]];
+          let fboObject = fboCache[p[1]];
           // if(buffer) throw new Error('Buffer in buffer error.');
           if(!fboObject) { // buffer ignore channel
-            fboObject = {
-              readFBO: this.createFBO(),
-              writeFBO: this.createFBO(),
-              get texture() {
-                return this.readFBO.texture;
-              },
-              swap() {
-                const tmp = this.writeFBO;
-                this.writeFBO = this.readFBO;
-                this.readFBO = tmp;
-              },
-            };
-            this._fbos[p[1]] = fboObject;
+            fboObject = new FBO(this.createFBO(), this.createFBO());
+            fboCache[p[1]] = fboObject;
 
             // 是否要新创建 fboProgram
             const f = /^#/.test(p[1]) ? document.querySelector(p[1]).textContent : await GlRender.fetchShader(p[1]);
@@ -188,6 +207,23 @@ void main() {
           return null;
         }
         return this.loadTexture(p[1]);
+      }));
+    }
+
+    const passes = fragmentShader.match(/^#pragma\s+pass\s+.*/mg); // 后期处理通道
+    if(passes) {
+      await Promise.all(passes.map(async (p, i) => {
+        const m = p.match(/^#pragma\s+pass\s+(.*)/);
+        if(/\.(glsl|frag)|^#.+$/.test(m[1])) {
+          this._passList = this._passList || [];
+          let passProgram = passCache[m[1]];
+          if(!passProgram) {
+            const f = /^#/.test(m[1]) ? document.querySelector(m[1]).textContent : await GlRender.fetchShader(m[1]);
+            passProgram = await this.compile(f, vert);
+            passCache[m[1]] = passProgram;
+            this._passList.push(passProgram);
+          }
+        }
       }));
     }
 
@@ -233,8 +269,8 @@ void main() {
 
     super.useProgram(program, attrOptions);
 
-    if(this._preloadedTextures) {
-      this._preloadedTextures.forEach((texture, i) => {
+    if(program._preloadedTextures) {
+      program._preloadedTextures.forEach((texture, i) => {
         if(texture && texture._img) {
           const samplerID = `dd_sampler${i}`;
           if(samplerID in program.uniforms) {
@@ -242,7 +278,7 @@ void main() {
           }
         }
       });
-      delete this._preloadedTextures;
+      delete program._preloadedTextures;
     }
 
     if(!program._init) {
@@ -422,9 +458,21 @@ void main() {
         fbo.swap();
       });
       this.useProgram(program);
-      this.bindFBO(null);
+      if(this._passList && this._passList.length) {
+        if(!this._passFBO) {
+          this._passFBO = new FBO(this.createFBO(), this.createFBO());
+        }
+        this.bindFBO(this._passFBO.writeFBO);
+      } else {
+        this.bindFBO(null);
+      }
       applyFBO(program);
       this.setMeshData(program.meshData);
+    } else if(!fbo && this._passList && this._passList.length) {
+      if(!this._passFBO) {
+        this._passFBO = new FBO(this.createFBO(), this.createFBO());
+      }
+      this.bindFBO(this._passFBO.writeFBO);
     }
 
     this.lastRenderTime = this.lastRenderTime || 0;
@@ -435,7 +483,7 @@ void main() {
     const time = (Date.now() - this.startRenderTime) / 1000;
     const timeDelta = time - this.lastRenderTime;
     this.lastRenderTime = time;
-    const uniforms = this.uniforms;
+    const uniforms = program.uniforms;
     const gl = this.gl;
 
     let needUpdate = false;
@@ -489,7 +537,31 @@ void main() {
       uniforms.dd_samplerFeedback = feedbackTexture;
     }
 
+    // console.log(this.startRenderTime, this.programs[0].uniforms.dd_time);
     super.render();
+
+    // pass
+    if(!fbo && this._passList) {
+      const len = this._passList.length;
+      const passFBO = this._passFBO;
+      this._passList.forEach((pass, i) => {
+        passFBO.swap();
+        this.useProgram(pass);
+        if(i === len - 1) {
+          this.bindFBO(null);
+        } else {
+          this.bindFBO(passFBO.writeFBO);
+        }
+        pass.uniforms.dd_samplerTarget = passFBO.texture;
+        this.setMeshData(pass.meshData);
+        this.render(t, true);
+        if(i === len - 1) {
+          this.useProgram(program);
+          this.setMeshData(program.meshData);
+          this.startRender = true;
+        }
+      });
+    }
 
     if(feedbackTexture) {
       gl.deleteTexture(feedbackTexture);

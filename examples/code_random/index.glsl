@@ -1,5 +1,7 @@
 #pragma texture /code_random/rgba-noise.png
 #pragma texture /code_random/slider.glsl
+#pragma pass /code_random/pass.glsl
+
 // #pragma texture #slider
 
 uniform sampler2D dd_sampler0;
