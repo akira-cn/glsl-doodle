@@ -1,4 +1,5 @@
 import GlRender from 'gl-renderer';
+import hash from './utils/hash';
 
 import stdlib from './lib/stdlib.glsl';
 import shapes from './lib/shapes.glsl';
@@ -128,7 +129,13 @@ canvas {
           }
         }
 
-        const doodle = new Doodle(canvas, {webgl2: isWebGL2, shadertoy: isShaderToy, autoUpdate: false});
+        const options = {webgl2: isWebGL2, shadertoy: isShaderToy, autoUpdate: false};
+
+        if(el.hasAttribute('seed')) {
+          options.seed = el.getAttribute('seed');
+        }
+
+        const doodle = new Doodle(canvas, options);
 
         const program = await doodle.compile(fragment, vertex);
         doodle.useProgram(program);
@@ -288,10 +295,10 @@ void main() {
         uniforms.dd_frameIndex = 0;
       }
       if('dd_randseed0' in uniforms) {
-        uniforms.dd_randseed0 = [Math.random(), Math.random()];
+        uniforms.dd_randseed0 = [hash(this.options.seed) / 1e16, Math.random()];
       }
       if('dd_randseed' in uniforms) {
-        uniforms.dd_randseed = uniforms.dd_randseed0 || [Math.random(), Math.random()];
+        uniforms.dd_randseed = uniforms.dd_randseed0 || [hash(this.options.seed, Math.random()), Math.random()];
       }
       if('dd_resolution' in uniforms) {
         uniforms.dd_resolution = [canvas.width, canvas.height];
