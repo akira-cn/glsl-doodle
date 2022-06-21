@@ -122,12 +122,7 @@ canvas {
         const isShaderToy = el.hasAttribute('shadertoy') && el.getAttribute('shadertoy') !== 'false';
         let isWebGL2 = isShaderToy;
         if(!isWebGL2 && vertex && /^\s*#version\s+300\s+es/mg.test(vertex)) isWebGL2 = true;
-        if(!isWebGL2 && fragment && /^\s*#version\s+300\s+es/mg.test(fragment)) {
-          isWebGL2 = true;
-          if(!/^\s*#define\s+WEBGL2/mg.test(fragment)) {
-            fragment = fragment.replace(/^(\s*#version\s+300\s+es)/mg, '$1\n#define WEBGL2\n');
-          }
-        }
+        if(!isWebGL2 && fragment && /^\s*#version\s+300\s+es/mg.test(fragment)) isWebGL2 = true;
 
         const options = {webgl2: isWebGL2, shadertoy: isShaderToy, autoUpdate: false};
 
@@ -150,7 +145,11 @@ canvas {
     window.addEventListener('DOMContentLoaded', load);
   }
 
-  async compile(frag, vert) {
+  preCompile(frag) {
+    const isWebGL2 = this.isWebGL2;
+    if(isWebGL2 && !/^\s*#define\s+WEBGL2/mg.test(frag)) {
+      frag = frag.replace(/^(\s*#version\s+300\s+es)/mg, '$1\n#define WEBGL2\n');
+    }
     const istoy = this.options.shadertoy;
     if(istoy) {
       frag = `#version 300 es
@@ -185,11 +184,11 @@ void main() {
   mainImage(FragColor, gl_FragCoord.xy);
 }`;
     }
-    const program = await super.compile(frag, vert);
+    return frag;
+  }
 
-    const {fragmentShader} = program.shaderText;
-
-    const matches = fragmentShader.match(/^#pragma\s+texture\s+.*/mg);
+  async postCompile(program, frag, vert) {
+    const matches = frag.match(/^#pragma\s+texture\s+.*/mg);
     if(matches) {
       program._preloadedTextures = await Promise.all(matches.map(async (m, i) => {
         const p = m.match(/^#pragma\s+texture\s+(.*)/);
@@ -217,7 +216,7 @@ void main() {
       }));
     }
 
-    const passes = fragmentShader.match(/^#pragma\s+pass\s+.*/mg); // 后期处理通道
+    const passes = frag.match(/^#pragma\s+pass\s+.*/mg); // 后期处理通道
     if(passes) {
       await Promise.all(passes.map(async (p, i) => {
         const m = p.match(/^#pragma\s+pass\s+(.*)/);
@@ -233,7 +232,19 @@ void main() {
         }
       }));
     }
+  }
 
+  async compile(frag, vert) {
+    frag = this.preCompile(frag);
+    const program = await super.compile(frag, vert);
+    const {fragmentShader} = program.shaderText;
+    await this.postCompile(program, fragmentShader, vert);
+    return program;
+  }
+
+  compileSync(frag, vert) {
+    frag = this.preCompile(frag);
+    const program = super.compileSync(frag, vert);
     return program;
   }
 
