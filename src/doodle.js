@@ -188,7 +188,7 @@ void main() {
   }
 
   async postCompile(program, frag, vert) {
-    const matches = frag.match(/^#pragma\s+texture\s+.*/mg);
+    let matches = frag.match(/^#pragma\s+texture\s+.*/mg);
     if(matches) {
       program._preloadedTextures = await Promise.all(matches.map(async (m, i) => {
         const p = m.match(/^#pragma\s+texture\s+(.*)/);
@@ -214,6 +214,21 @@ void main() {
         }
         return this.loadTexture(p[1]);
       }));
+    }
+
+    // createCube
+    matches = frag.match(/^#pragma\s+textureCube\s+.*/mg);
+    if(matches) {
+      const cubeImgs = [];
+      for(let i = 0; i < matches.length; i++) {
+        const p = matches[i].match(/^#pragma\s+textureCube\s+(.*)/);
+        cubeImgs.push(Doodle.loadImage(p[1], {useImageBitmap: true}));
+      }
+      const cubeTexture = await Promise.all(cubeImgs).then((imgs) => {
+        return this.createTexture(imgs, {wrapS: this.gl.REPEAT, wrapT: this.gl.REPEAT});
+      });
+      program._preloadedTextures = program._preloadedTextures || [];
+      program._preloadedTextures.unshift(cubeTexture);
     }
 
     const passes = frag.match(/^#pragma\s+pass\s+.*/mg); // 后期处理通道

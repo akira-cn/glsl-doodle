@@ -1,0 +1,23 @@
+<script src="/js/glsl-doodle.js"></script>
+<canvas width="1280" height="720"></canvas>
+<style>
+  canvas {
+    width: 640px;
+    height: 360px;
+    background: black;
+  }
+</style>
+<script>
+  (async function () {
+    const canvas = document.querySelector('canvas');
+    const renderer = new Doodle(canvas, {webgl2: true, shadertoy: true});
+    const fragment = await (await fetch('index3.glsl')).text();
+    const program = await renderer.compile(fragment);
+    renderer.useProgram(program);
+    renderer.render();
+    const {program: prog, gl} = renderer;
+    prog.meshData[0].enableBlend = true;
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    gl.clearColor(0, 0, 0, 1.0);
+  }());
+</script>
